@@ -1,0 +1,74 @@
+<!-- Product Card -->
+<div class="product-card" data-product-id="{{ product.id }}">
+    <div class="product-badges">
+        {% if product.is_new %}
+        <span class="badge badge-new">New</span>
+        {% endif %}
+        {% if product.get_discount_percentage() > 0 %}
+        <span class="badge badge-sale">-{{ product.get_discount_percentage() }}%</span>
+        {% endif %}
+        {% if product.is_featured %}
+        <span class="badge badge-featured">Hot</span>
+        {% endif %}
+    </div>
+    
+    <div class="product-wishlist">
+        <button class="wishlist-btn" data-product-id="{{ product.id }}" onclick="toggleWishlist({{ product.id }})">
+            <i data-lucide="{{ icons.ICONS.wishlist }}"></i>
+        </button>
+    </div>
+    
+    <a href="{{ url_for('shop.product_detail', slug=product.slug) }}" class="product-image">
+        {% if product.image_url %}
+        <img src="{{ url_for('static', filename='images/products/' + product.image_url) }}" alt="{{ product.name }}" loading="lazy">
+        {% else %}
+        <div class="product-placeholder">
+            <i data-lucide="{{ icons.ICONS.product }}"></i>
+        </div>
+        {% endif %}
+        <div class="product-overlay">
+            <span class="quick-view">Quick View</span>
+        </div>
+    </a>
+    
+    <div class="product-info">
+        <div class="product-category">
+            {{ product.category.name if product.category else 'Uncategorized' }}
+        </div>
+        <h3 class="product-name">
+            <a href="{{ url_for('shop.product_detail', slug=product.slug) }}">{{ product.name }}</a>
+        </h3>
+        
+        <div class="product-rating">
+            {% set rating = product.get_average_rating()|int %}
+            {% for i in range(5) %}
+                {% if i < rating %}
+                <i data-lucide="{{ icons.ICONS.star }}" class="star-filled"></i>
+                {% else %}
+                <i data-lucide="{{ icons.ICONS.star }}" class="star-empty"></i>
+                {% endif %}
+            {% endfor %}
+            <span class="rating-count">({{ product.get_review_count() }})</span>
+        </div>
+        
+        <div class="product-footer">
+            <div class="product-price">
+                {% if product.original_price and product.original_price > product.price_robux %}
+                <span class="price-original">{{ product.original_price|format_robux }}</span>
+                {% endif %}
+                <span class="price-current">{{ product.get_display_price()|format_robux }}</span>
+                <i data-lucide="{{ icons.ICONS.robux }}" class="robux-icon"></i>
+            </div>
+            
+            {% if product.is_in_stock() %}
+            <button class="btn-add-cart" onclick="quickAddToCart({{ product.id }})" title="Add to Cart">
+                <i data-lucide="{{ icons.ICONS.cart }}"></i>
+            </button>
+            {% else %}
+            <span class="out-of-stock">Out of Stock</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="product-glow"></div>
+</div>

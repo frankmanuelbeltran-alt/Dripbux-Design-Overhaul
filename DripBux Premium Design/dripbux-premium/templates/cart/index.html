@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<!-- Cart Header -->
+<section class="cart-header">
+    <div class="container">
+        <h1 class="cart-title">Shopping Cart</h1>
+        <p class="cart-subtitle">{{ cart.get_total_items() }} item{% if cart.get_total_items() != 1 %}s{% endif %} in your cart</p>
+    </div>
+</section>
+
+<!-- Cart Content -->
+<section class="cart-content">
+    <div class="container">
+        {% if cart.items %}
+        <div class="cart-layout">
+            <!-- Cart Items -->
+            <div class="cart-items">
+                {% for item in cart.items %}
+                <div class="cart-item" data-item-id="{{ item.id }}">
+                    <div class="cart-item-image">
+                        {% if item.product.image_url %}
+                        <img src="{{ url_for('static', filename='images/products/' + item.product.image_url) }}" alt="{{ item.product.name }}">
+                        {% else %}
+                        <div class="image-placeholder">
+                            <i data-lucide="{{ icons.ICONS.product }}"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="cart-item-details">
+                        <h3 class="item-name">
+                            <a href="{{ url_for('shop.product_detail', slug=item.product.slug) }}">{{ item.product.name }}</a>
+                        </h3>
+                        <p class="item-variant">Size: {{ item.size.size }}</p>
+                        <p class="item-price">
+                            {{ (item.product.price_robux + item.size.price_modifier)|format_robux }}
+                            <i data-lucide="{{ icons.ICONS.robux }}"></i>
+                        </p>
+                        
+                        {% if not item.is_valid() %}
+                        <span class="item-error">
+                            <i data-lucide="{{ icons.ICONS.warning }}"></i>
+                            Only {{ item.size.stock }} available
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="cart-item-actions">
+                        <div class="quantity-selector">
+                            <button type="button" class="qty-btn" onclick="updateCartItem({{ item.id }}, -1)">
+                                <i data-lucide="{{ icons.ICONS.minus }}"></i>
+                            </button>
+                            <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" max="99" readonly>
+                            <button type="button" class="qty-btn" onclick="updateCartItem({{ item.id }}, 1)">
+                                <i data-lucide="{{ icons.ICONS.plus }}"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="item-subtotal">
+                            <span class="subtotal-label">Subtotal:</span>
+                            <span class="subtotal-value">{{ item.get_subtotal()|format_robux }}</span>
+                            <i data-lucide="{{ icons.ICONS.robux }}"></i>
+                        </div>
+                        
+                        <button type="button" class="btn-remove" onclick="removeCartItem({{ item.id }})">
+                            <i data-lucide="{{ icons.ICONS.trash }}"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="cart-actions">
+                    <a href="{{ url_for('shop.index') }}" class="btn btn-outline">
+                        <i data-lucide="{{ icons.ICONS.arrow_left }}"></i>
+                        Continue Shopping
+                    </a>
+                    <form action="{{ url_for('cart.clear_cart') }}" method="POST" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-text">
+                            <i data-lucide="{{ icons.ICONS.trash }}"></i>
+                            Clear Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h2 class="summary-title">Order Summary</h2>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span class="summary-value">{{ cart.get_subtotal()|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span class="summary-value">
+                            {% if cart.get_subtotal() >= 1000 %}
+                            FREE
+                            {% else %}
+                            Calculated at checkout
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if cart.get_subtotal() < 1000 %}
+                    <div class="free-shipping-notice">
+                        <i data-lucide="{{ icons.ICONS.info }}"></i>
+                        <span>Add {{ (1000 - cart.get_subtotal())|format_robux }} more for free shipping!</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="summary-divider"></div>
+                    
+                    <div class="summary-row total">
+                        <span>Estimated Total</span>
+                        <span class="summary-value">{{ cart.get_total()|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                    
+                    <div class="balance-info">
+                        <span>Your Balance:</span>
+                        <span class="balance-value {% if current_user.robux_balance < cart.get_total() %}insufficient{% endif %}">
+                            {{ current_user.robux_balance|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i>
+                        </span>
+                    </div>
+                    
+                    {% if current_user.robux_balance < cart.get_total() %}
+                    <div class="insufficient-balance">
+                        <i data-lucide="{{ icons.ICONS.warning }}"></i>
+                        <span>Insufficient balance. You need {{ (cart.get_total() - current_user.robux_balance)|format_robux }} more.</span>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('checkout.shipping') }}" class="btn btn-primary btn-lg btn-block btn-glow {% if current_user.robux_balance < cart.get_total() or invalid_items %}disabled{% endif %}">
+                        Proceed to Checkout
+                        <i data-lucide="{{ icons.ICONS.arrow_right }}"></i>
+                    </a>
+                    
+                    <div class="secure-checkout">
+                        <i data-lucide="{{ icons.ICONS.success }}"></i>
+                        <span>Secure checkout with Robux</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="empty-cart">
+            <div class="empty-icon">
+                <i data-lucide="{{ icons.ICONS.cart }}"></i>
+            </div>
+            <h2 class="empty-title">Your cart is empty</h2>
+            <p class="empty-description">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-primary btn-lg btn-glow">
+                <i data-lucide="{{ icons.ICONS.shop }}"></i>
+                Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateCartItem(itemId, change) {
+    const item = document.querySelector(`[data-item-id="${itemId}"]`);
+    const qtyInput = item.querySelector('.qty-input');
+    const currentQty = parseInt(qtyInput.value);
+    const newQty = currentQty + change;
+    
+    if (newQty < 1) return;
+    
+    fetch('{{ url_for('cart.update_cart_item', item_id=0) }}'.replace('0', itemId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: `quantity=${newQty}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            qtyInput.value = newQty;
+            updateCartBadge(data.cart_count);
+            // Reload to update totals
+            location.reload();
+        } else {
+            showNotification(data.message, 'error');
+        }
+    });
+}
+
+function removeCartItem(itemId) {
+    if (!confirm('Remove this item from your cart?')) return;
+    
+    fetch('{{ url_for('cart.remove_from_cart', item_id=0) }}'.replace('0', itemId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            updateCartBadge(data.cart_count);
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}
