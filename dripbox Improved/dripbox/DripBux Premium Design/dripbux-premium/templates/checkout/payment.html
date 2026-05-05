@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Payment{% endblock %}
+
+{% block content %}
+<!-- Checkout Header -->
+<section class="checkout-header">
+    <div class="container">
+        <h1 class="checkout-title">Checkout</h1>
+        
+        <!-- Checkout Steps -->
+        <div class="checkout-steps">
+            <div class="step completed">
+                <div class="step-number"><i data-lucide="{{ icons.ICONS.success }}"></i></div>
+                <span class="step-label">Shipping</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step completed">
+                <div class="step-number"><i data-lucide="{{ icons.ICONS.success }}"></i></div>
+                <span class="step-label">Review</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step active">
+                <div class="step-number">3</div>
+                <span class="step-label">Payment</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Payment Content -->
+<section class="checkout-content">
+    <div class="container">
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <div class="form-card payment-card">
+                    <div class="payment-header">
+                        <div class="payment-icon">
+                            <i data-lucide="{{ icons.ICONS.robux }}"></i>
+                        </div>
+                        <h2 class="form-title">Pay with Robux</h2>
+                    </div>
+                    
+                    <div class="payment-details">
+                        <div class="balance-display">
+                            <span class="balance-label">Your Current Balance</span>
+                            <span class="balance-amount">{{ user_balance|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                        </div>
+                        
+                        <div class="payment-amount">
+                            <span class="amount-label">Amount to Pay</span>
+                            <span class="amount-value">{{ total|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                        </div>
+                        
+                        <div class="remaining-balance">
+                            <span class="remaining-label">Balance After Purchase</span>
+                            <span class="remaining-value">{{ (user_balance - total)|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('checkout.payment') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="payment-terms">
+                            <label class="checkbox-label">
+                                <input type="checkbox" required>
+                                <span class="checkmark"></span>
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <a href="{{ url_for('checkout.review') }}" class="btn btn-outline">
+                                <i data-lucide="{{ icons.ICONS.arrow_left }}"></i>
+                                Back
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg btn-glow" id="payButton">
+                                <span>Complete Purchase</span>
+                                <i data-lucide="{{ icons.ICONS.arrow_right }}"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="payment-security">
+                        <i data-lucide="{{ icons.ICONS.success }}"></i>
+                        <span>Secure transaction. Your Robux will be deducted instantly.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="checkout-summary">
+                <div class="summary-card">
+                    <h3 class="summary-title">Order Summary</h3>
+                    
+                    <div class="summary-items compact">
+                        {% for item in cart.items %}
+                        <div class="summary-item">
+                            <span class="item-name">{{ item.product.name }} ({{ item.size.size }}) x {{ item.quantity }}</span>
+                            <span class="item-price">{{ item.get_subtotal()|format_robux }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="summary-divider"></div>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>{{ subtotal|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>{% if shipping_fee == 0 %}FREE{% else %}{{ shipping_fee|format_robux }}{% endif %}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span class="total-value">{{ total|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                    
+                    <div class="shipping-address-summary">
+                        <h4>Shipping To:</h4>
+                        <p>{{ shipping_info.full_name }}</p>
+                        <p>{{ shipping_info.address_line1 }}</p>
+                        {% if shipping_info.address_line2 %}<p>{{ shipping_info.address_line2 }}</p>{% endif %}
+                        <p>{{ shipping_info.city }}, {{ shipping_info.state }} {{ shipping_info.postal_code }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('payButton').addEventListener('click', function(e) {
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner"></span> Processing...';
+});
+</script>
+{% endblock %}

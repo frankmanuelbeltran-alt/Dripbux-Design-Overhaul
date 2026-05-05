@@ -1,0 +1,205 @@
+/* =============================================================================
+   TOAST NOTIFICATIONS - DripBux Premium
+   Pink luxury themed popup notifications inspired by ArmsDealer
+   ============================================================================= */
+
+/* ── Container ────────────────────────────────────────────────────── */
+#toast-container {
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+    max-width: 380px;
+    width: calc(100vw - 48px);
+}
+
+/* ── Base Toast ───────────────────────────────────────────────────── */
+.toast {
+    pointer-events: all;
+    display: grid;
+    grid-template-columns: 40px 1fr 28px;
+    grid-template-rows: auto auto;
+    gap: 4px 12px;
+    align-items: start;
+    padding: 16px 16px 14px 16px;
+
+    /* Pink luxury glass panel */
+    background: rgba(26, 26, 36, 0.97);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 77, 141, 0.25);
+    border-left-width: 3px;
+    border-radius: 14px;
+
+    font-family: var(--font-body, 'Inter', sans-serif);
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.5;
+
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 77, 141, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    /* Enter animation */
+    transform: translateX(120%);
+    opacity: 0;
+    transition:
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.35s ease;
+
+    /* Progress bar lives at the bottom */
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.toast--visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.toast--hiding {
+    transform: translateX(120%);
+    opacity: 0;
+}
+
+/* ── Glow border effect on hover ─────────────────────────────────── */
+.toast:hover {
+    border-color: rgba(255, 77, 141, 0.5);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 77, 141, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ── Progress bar (bottom) ───────────────────────────────────────── */
+.toast__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    transform-origin: left;
+    animation: toast-drain linear forwards;
+    border-radius: 0 0 0 14px;
+}
+
+@keyframes toast-drain {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+/* ── Icon cell ───────────────────────────────────────────────────── */
+.toast__icon {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 2px;
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* ── Label (category tag) ────────────────────────────────────────── */
+.toast__label {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.75;
+}
+
+/* ── Message ─────────────────────────────────────────────────────── */
+.toast__message {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Close button ────────────────────────────────────────────────── */
+.toast__close {
+    grid-column: 3;
+    grid-row: 1;
+    background: transparent;
+    border: 1px solid rgba(255, 77, 141, 0.2);
+    border-radius: 8px;
+    color: rgba(160, 160, 176, 0.5);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toast__close:hover {
+    color: #ff4d8d;
+    border-color: rgba(255, 77, 141, 0.5);
+    background: rgba(255, 77, 141, 0.1);
+}
+
+/* ── Variants ────────────────────────────────────────────────────── */
+
+/* SUCCESS ── pink/coral glow */
+.toast--success {
+    border-left-color: #00e676;
+}
+.toast--success .toast__label  { color: #00e676; }
+.toast--success .toast__progress { background: #00e676; }
+.toast--success .toast__icon   { color: #00e676; }
+
+/* ERROR ── red glow */
+.toast--error {
+    border-left-color: #ff1744;
+}
+.toast--error .toast__label  { color: #ff1744; }
+.toast--error .toast__progress { background: #ff1744; }
+.toast--error .toast__icon   { color: #ff1744; }
+
+/* WARNING ── amber glow */
+.toast--warning {
+    border-left-color: #ffc400;
+}
+.toast--warning .toast__label  { color: #ffc400; }
+.toast--warning .toast__progress { background: #ffc400; }
+.toast--warning .toast__icon   { color: #ffc400; }
+
+/* INFO ── cyan glow */
+.toast--info {
+    border-left-color: #00b0ff;
+}
+.toast--info .toast__label  { color: #00b0ff; }
+.toast--info .toast__progress { background: #00b0ff; }
+.toast--info .toast__icon   { color: #00b0ff; }
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    #toast-container {
+        top: auto;
+        bottom: 20px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        width: auto;
+    }
+
+    .toast.toast--hiding {
+        transform: translateY(120%);
+        opacity: 0;
+    }
+    .toast {
+        transform: translateY(120%);
+    }
+    .toast.toast--visible {
+        transform: translateY(0);
+    }
+}

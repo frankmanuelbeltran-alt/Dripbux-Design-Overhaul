@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb-list">
+            <li><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li><a href="{{ url_for('shop.index') }}">Shop</a></li>
+            {% if product.category %}
+            <li><a href="{{ url_for('shop.category', slug=product.category.slug) }}">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="active">{{ product.name }}</li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Product Detail -->
+<section class="product-detail">
+    <div class="container">
+        <div class="product-layout">
+            <!-- Product Images -->
+            <div class="product-images">
+                <div class="main-image">
+                    {% if product.image_url %}
+                    <img src="{{ url_for('static', filename='images/products/' + product.image_url) }}" alt="{{ product.name }}" id="mainImage">
+                    {% else %}
+                    <div class="image-placeholder">
+                        <i data-lucide="{{ icons.ICONS.product }}"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if product.additional_images %}
+                <div class="thumbnail-images">
+                    <button class="thumbnail active" data-image="{{ url_for('static', filename='images/products/' + product.image_url) }}">
+                        <img src="{{ url_for('static', filename='images/products/' + product.image_url) }}" alt="{{ product.name }}">
+                    </button>
+                    {% for img in product.additional_images %}
+                    <button class="thumbnail" data-image="{{ url_for('static', filename='images/products/' + img) }}">
+                        <img src="{{ url_for('static', filename='images/products/' + img) }}" alt="{{ product.name }}">
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Product Info -->
+            <div class="product-info-panel">
+                <div class="product-badges">
+                    {% if product.is_new %}
+                    <span class="badge badge-new">New</span>
+                    {% endif %}
+                    {% if product.get_discount_percentage() > 0 %}
+                    <span class="badge badge-sale">-{{ product.get_discount_percentage() }}%</span>
+                    {% endif %}
+                </div>
+                
+                <h1 class="product-title">{{ product.name }}</h1>
+                
+                <div class="product-meta">
+                    <div class="product-rating">
+                        {% set rating = product.get_average_rating()|int %}
+                        {% for i in range(5) %}
+                            {% if i < rating %}
+                            <i data-lucide="{{ icons.ICONS.star }}" class="star-filled"></i>
+                            {% else %}
+                            <i data-lucide="{{ icons.ICONS.star }}" class="star-empty"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-text">{{ product.get_average_rating() }} ({{ product.get_review_count() }} reviews)</span>
+                    </div>
+                    <div class="product-sku">SKU: DBX-{{ '%05d' % product.id }}</div>
+                </div>
+                
+                <div class="product-price-section">
+                    <div class="product-price">
+                        {% if product.original_price and product.original_price > product.price_robux %}
+                        <span class="price-original">{{ product.original_price|format_robux }}</span>
+                        {% endif %}
+                        <span class="price-current" id="priceDisplay">{{ product.get_display_price()|format_robux }}</span>
+                        <i data-lucide="{{ icons.ICONS.robux }}" class="robux-icon"></i>
+                    </div>
+                    {% if product.is_in_stock() %}
+                    <span class="stock-status in-stock">
+                        <i data-lucide="{{ icons.ICONS.success }}"></i>
+                        In Stock ({{ product.get_total_stock() }} available)
+                    </span>
+                    {% else %}
+                    <span class="stock-status out-of-stock">
+                        <i data-lucide="{{ icons.ICONS.error }}"></i>
+                        Out of Stock
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <p class="product-description">{{ product.short_description or product.description|truncate_words(30) }}</p>
+                
+                <!-- Size Selection -->
+                {% if product.sizes %}
+                <div class="size-selection">
+                    <label class="size-label">Select Size:</label>
+                    <div class="size-options" id="sizeOptions">
+                        {% for size in product.sizes|sort(attribute='size') %}
+                        <button type="button" class="size-option {% if size.stock == 0 %}disabled{% endif %}" 
+                                data-size-id="{{ size.id }}" 
+                                data-price="{{ size.get_total_price() }}"
+                                data-stock="{{ size.stock }}"
+                                {% if size.stock == 0 %}disabled{% endif %}>
+                            {{ size.size }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Quantity -->
+                <div class="quantity-section">
+                    <label class="quantity-label">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button type="button" class="qty-btn" onclick="updateQty(-1)">
+                            <i data-lucide="{{ icons.ICONS.minus }}"></i>
+                        </button>
+                        <input type="number" id="quantity" value="1" min="1" max="10" readonly>
+                        <button type="button" class="qty-btn" onclick="updateQty(1)">
+                            <i data-lucide="{{ icons.ICONS.plus }}"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="product-actions">
+                    <button type="button" class="btn btn-primary btn-lg btn-add-to-cart" id="addToCartBtn" onclick="addToCart()" disabled>
+                        <i data-lucide="{{ icons.ICONS.cart }}"></i>
+                        <span>Add to Cart</span>
+                    </button>
+                    <button type="button" class="btn btn-outline btn-wishlist {% if in_wishlist %}active{% endif %}" onclick="toggleWishlist({{ product.id }})">
+                        <i data-lucide="{{ icons.ICONS.wishlist }}"></i>
+                    </button>
+                </div>
+                
+                <!-- Product Details -->
+                <div class="product-details-accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Description</span>
+                            <i data-lucide="{{ icons.ICONS.chevron_down }}"></i>
+                        </button>
+                        <div class="accordion-content">
+                            <p>{{ product.description }}</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Shipping & Returns</span>
+                            <i data-lucide="{{ icons.ICONS.chevron_down }}"></i>
+                        </button>
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Free standard shipping on orders over 1,000 Robux</li>
+                                <li>Express shipping available for 199 Robux</li>
+                                <li>30-day return policy</li>
+                                <li>Full Robux refund on returns</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews Section -->
+<section class="reviews-section">
+    <div class="container">
+        <h2 class="section-title">Customer Reviews</h2>
+        
+        <div class="reviews-summary">
+            <div class="rating-big">
+                <span class="rating-number">{{ product.get_average_rating() }}</span>
+                <div class="rating-stars">
+                    {% set rating = product.get_average_rating()|int %}
+                    {% for i in range(5) %}
+                        {% if i < rating %}
+                        <i data-lucide="{{ icons.ICONS.star }}" class="star-filled"></i>
+                        {% else %}
+                        <i data-lucide="{{ icons.ICONS.star }}" class="star-empty"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="rating-total">Based on {{ product.get_review_count() }} reviews</span>
+            </div>
+            
+            {% if can_review %}
+            <button class="btn btn-primary" onclick="document.getElementById('reviewForm').scrollIntoView({behavior: 'smooth'})">
+                <i data-lucide="{{ icons.ICONS.edit }}"></i>
+                Write a Review
+            </button>
+            {% endif %}
+        </div>
+        
+        {% if reviews %}
+        <div class="reviews-list">
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <div class="reviewer-avatar">
+                            {% if review.user.avatar_url %}
+                            <img src="{{ url_for('static', filename='images/avatars/' + review.user.avatar_url) }}" alt="{{ review.user.username }}">
+                            {% else %}
+                            <span>{{ review.user.username[0]|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="reviewer-details">
+                            <span class="reviewer-name">{{ review.user.username }}</span>
+                            {% if review.is_verified_purchase %}
+                            <span class="verified-badge">
+                                <i data-lucide="{{ icons.ICONS.success }}"></i>
+                                Verified Purchase
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="review-date">{{ review.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="review-rating">
+                    {% for i in range(5) %}
+                        {% if i < review.rating %}
+                        <i data-lucide="{{ icons.ICONS.star }}" class="star-filled"></i>
+                        {% else %}
+                        <i data-lucide="{{ icons.ICONS.star }}" class="star-empty"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if review.title %}
+                <h4 class="review-title">{{ review.title }}</h4>
+                {% endif %}
+                <p class="review-content">{{ review.comment }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-reviews">
+            <p>No reviews yet. Be the first to review this product!</p>
+        </div>
+        {% endif %}
+        
+        {% if can_review %}
+        <div class="review-form-wrapper" id="reviewForm">
+            <h3>Write a Review</h3>
+            <form action="{{ url_for('shop.add_review', slug=product.slug) }}" method="POST" class="review-form">
+                {{ form.hidden_tag() if form else '' }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-group">
+                    <label>Rating</label>
+                    <select name="rating" class="form-select" required>
+                        <option value="5">5 Stars - Excellent</option>
+                        <option value="4">4 Stars - Very Good</option>
+                        <option value="3">3 Stars - Good</option>
+                        <option value="2">2 Stars - Fair</option>
+                        <option value="1">1 Star - Poor</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Review Title (Optional)</label>
+                    <input type="text" name="title" class="form-input" placeholder="Summarize your experience">
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Review</label>
+                    <textarea name="comment" class="form-textarea" rows="4" placeholder="Share your thoughts about this product..." required minlength="10"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Related Products -->
+{% if related_products %}
+<section class="related-products-section">
+    <div class="container">
+        <h2 class="section-title">You Might Also Like</h2>
+        <div class="products-grid">
+            {% for product in related_products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedSizeId = null;
+let selectedPrice = {{ product.get_display_price() }};
+
+// Size selection
+document.querySelectorAll('.size-option').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if (this.disabled) return;
+        
+        document.querySelectorAll('.size-option').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        selectedSizeId = this.dataset.sizeId;
+        selectedPrice = parseInt(this.dataset.price);
+        
+        // Update price display
+        document.getElementById('priceDisplay').textContent = selectedPrice.toLocaleString();
+        
+        // Enable add to cart button
+        document.getElementById('addToCartBtn').disabled = false;
+    });
+});
+
+// Quantity update
+function updateQty(change) {
+    const qtyInput = document.getElementById('quantity');
+    let newVal = parseInt(qtyInput.value) + change;
+    if (newVal < 1) newVal = 1;
+    if (newVal > 10) newVal = 10;
+    qtyInput.value = newVal;
+}
+
+// Add to cart
+function addToCart() {
+    if (!selectedSizeId) {
+        showNotification('Please select a size', 'error');
+        return;
+    }
+    
+    const quantity = document.getElementById('quantity').value;
+    const btn = document.getElementById('addToCartBtn');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Adding...';
+    
+    fetch('{{ url_for('cart.add_to_cart') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: `product_id={{ product.id }}&size_id=${selectedSizeId}&quantity=${quantity}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            updateCartBadge(data.cart_count);
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(err => {
+        showNotification('Error adding to cart', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="shopping-cart"></i><span>Add to Cart</span>';
+        lucide.createIcons();
+    });
+}
+
+// Thumbnail image switch
+document.querySelectorAll('.thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', function() {
+        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('mainImage').src = this.dataset.image;
+    });
+});
+
+// Accordion toggle
+function toggleAccordion(header) {
+    const item = header.parentElement;
+    item.classList.toggle('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,524 @@
+/* =============================================================================
+   ACCOUNT PANEL SIDEBAR - DripBux Premium
+   Pink luxury sliding panel for user account
+   ============================================================================= */
+
+/* ── Panel Overlay ────────────────────────────────────────────────── */
+.acct-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 20, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 2000;
+}
+.acct-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── Sidebar Panel ────────────────────────────────────────────────── */
+.acct-sidebar {
+    position: fixed;
+    top: 72px;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    max-width: 90vw;
+    background: linear-gradient(180deg, rgba(26, 26, 36, 0.98) 0%, rgba(15, 15, 20, 0.99) 100%);
+    backdrop-filter: blur(30px);
+    border-left: 1px solid rgba(255, 77, 141, 0.2);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 2001;
+    overflow: hidden;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Right accent glow bar */
+.acct-sidebar::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg,
+        var(--primary, #ff4d8d),
+        var(--primary-light, #ff80ab) 50%,
+        transparent);
+    z-index: 2;
+}
+
+.acct-sidebar.open {
+    transform: translateX(0);
+}
+
+/* ── Panel Header ────────────────────────────────────────────────── */
+.acct-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 0 24px;
+    height: 56px;
+    border-bottom: 1px solid rgba(255, 77, 141, 0.15);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+    background: rgba(26, 26, 36, 0.6);
+}
+
+.acct-header-title {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--primary, #ff4d8d) 0%, var(--primary-light, #ff80ab) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.acct-close {
+    background: none;
+    border: 1px solid rgba(255, 77, 141, 0.25);
+    border-radius: 10px;
+    color: var(--text-muted, #6a6a7a);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: var(--font-body, 'Inter', sans-serif);
+}
+.acct-close:hover {
+    color: var(--primary, #ff4d8d);
+    border-color: var(--primary, #ff4d8d);
+    background: rgba(255, 77, 141, 0.1);
+}
+
+/* ── Panel Body ──────────────────────────────────────────────────── */
+.acct-body {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    z-index: 2;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 77, 141, 0.2) transparent;
+}
+.acct-body::-webkit-scrollbar {
+    width: 4px;
+}
+.acct-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 77, 141, 0.2);
+    border-radius: 4px;
+}
+
+/* ── Avatar Block ────────────────────────────────────────────────── */
+.acct-avatar-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 77, 141, 0.1);
+}
+
+.acct-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 77, 141, 0.4);
+    background: linear-gradient(135deg, rgba(255, 77, 141, 0.15) 0%, rgba(157, 78, 221, 0.15) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.acct-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.acct-avatar-initials {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary, #ff4d8d) 0%, var(--primary-light, #ff80ab) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.05em;
+}
+
+.acct-avatar-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #00e676;
+    border: 2px solid #1a1a24;
+    box-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+}
+.acct-avatar-status.offline {
+    background: var(--text-muted, #6a6a7a);
+    box-shadow: none;
+}
+
+.acct-avatar-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.acct-username {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.acct-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted, #6a6a7a);
+    border: 1px solid rgba(255, 77, 141, 0.2);
+    border-radius: 6px;
+    padding: 3px 10px;
+}
+.acct-role-badge.admin {
+    color: var(--accent-gold, #ffd700);
+    border-color: rgba(255, 215, 0, 0.3);
+    background: rgba(255, 215, 0, 0.08);
+}
+
+/* ── Section Labels & Dividers ──────────────────────────────────── */
+.acct-section-label {
+    padding: 16px 24px 6px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted, #6a6a7a);
+}
+
+.acct-divider {
+    height: 1px;
+    background: rgba(255, 77, 141, 0.1);
+    margin: 6px 20px;
+}
+
+/* ── Info Rows ───────────────────────────────────────────────────── */
+.acct-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid rgba(255, 77, 141, 0.06);
+    font-size: 12px;
+    gap: 8px;
+}
+.acct-info-label {
+    color: var(--text-muted, #6a6a7a);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.acct-info-value {
+    color: var(--text-secondary, #a0a0b0);
+    text-align: right;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+.acct-info-value.bright {
+    color: var(--primary-light, #ff80ab);
+    font-weight: 600;
+}
+
+/* ── Cart Row ────────────────────────────────────────────────────── */
+.acct-cart-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255, 77, 141, 0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.acct-cart-row:hover {
+    background: rgba(255, 77, 141, 0.05);
+}
+.acct-cart-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-secondary, #a0a0b0);
+    font-weight: 500;
+}
+.acct-cart-left i {
+    width: 16px;
+    height: 16px;
+    color: var(--primary, #ff4d8d);
+}
+.acct-cart-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.acct-cart-count {
+    background: linear-gradient(135deg, var(--primary, #ff4d8d) 0%, var(--primary-dark, #e91e63) 100%);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+    min-width: 22px;
+    text-align: center;
+}
+.acct-cart-empty {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted, #6a6a7a);
+    text-transform: uppercase;
+}
+.acct-cart-arrow {
+    color: var(--primary, #ff4d8d);
+    font-size: 12px;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+.acct-cart-row:hover .acct-cart-arrow {
+    opacity: 1;
+}
+
+/* ── Action Buttons ──────────────────────────────────────────────── */
+.acct-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 77, 141, 0.06);
+    font-family: var(--font-body, 'Inter', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    text-decoration: none;
+    color: var(--text-secondary, #a0a0b0);
+    position: relative;
+}
+.acct-action-btn i {
+    width: 16px;
+    height: 16px;
+    color: var(--primary, #ff4d8d);
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+.acct-action-btn .acct-btn-arrow {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--primary, #ff4d8d);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.acct-action-btn:hover {
+    background: rgba(255, 77, 141, 0.06);
+    color: #ffffff;
+}
+.acct-action-btn:hover i {
+    opacity: 1;
+}
+.acct-action-btn:hover .acct-btn-arrow {
+    opacity: 1;
+}
+.acct-action-btn.danger {
+    color: var(--error, #ff1744);
+}
+.acct-action-btn.danger i {
+    color: var(--error, #ff1744);
+}
+.acct-action-btn.danger:hover {
+    background: rgba(255, 23, 68, 0.06);
+}
+
+/* ── Auth Block (logged out) ─────────────────────────────────────── */
+.acct-auth-block {
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.acct-auth-message {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted, #6a6a7a);
+    text-align: center;
+    line-height: 1.7;
+    margin-bottom: 8px;
+}
+.acct-auth-separator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+}
+.acct-auth-separator::before,
+.acct-auth-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 77, 141, 0.15);
+}
+.acct-auth-sep-text {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted, #6a6a7a);
+    text-transform: uppercase;
+}
+.acct-login-btn,
+.acct-register-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    transition: all 0.25s;
+    width: 100%;
+    text-decoration: none;
+    font-family: var(--font-body, 'Inter', sans-serif);
+}
+.acct-login-btn {
+    background: linear-gradient(135deg, var(--primary, #ff4d8d) 0%, var(--primary-dark, #e91e63) 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(255, 77, 141, 0.3);
+}
+.acct-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 141, 0.5);
+}
+.acct-register-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 77, 141, 0.3);
+    color: var(--text-secondary, #a0a0b0);
+}
+.acct-register-btn:hover {
+    border-color: var(--primary, #ff4d8d);
+    color: #ffffff;
+    background: rgba(255, 77, 141, 0.08);
+}
+
+/* ── Panel Footer ────────────────────────────────────────────────── */
+.acct-footer {
+    padding: 12px 24px 16px;
+    border-top: 1px solid rgba(255, 77, 141, 0.1);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    background: rgba(26, 26, 36, 0.6);
+}
+.acct-session-info {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted, #6a6a7a);
+    line-height: 1.7;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.acct-session-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00e676;
+    box-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+    flex-shrink: 0;
+}
+.acct-session-dot.offline {
+    background: var(--text-muted, #6a6a7a);
+    box-shadow: none;
+}
+
+/* ── Robux Balance Display ───────────────────────────────────────── */
+.acct-balance-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    background: rgba(255, 77, 141, 0.06);
+    border-bottom: 1px solid rgba(255, 77, 141, 0.1);
+}
+.acct-balance-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted, #6a6a7a);
+    font-weight: 600;
+}
+.acct-balance-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-gold, #ffd700);
+}
+.acct-balance-value i {
+    width: 18px;
+    height: 18px;
+    color: var(--accent-gold, #ffd700);
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .acct-sidebar {
+        width: 100%;
+        max-width: 100%;
+        top: 0;
+        border-left: none;
+    }
+    .acct-sidebar::before {
+        display: none;
+    }
+}

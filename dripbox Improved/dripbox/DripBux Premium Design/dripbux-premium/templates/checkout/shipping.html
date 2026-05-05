@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Shipping{% endblock %}
+
+{% block content %}
+<!-- Checkout Header -->
+<section class="checkout-header">
+    <div class="container">
+        <h1 class="checkout-title">Checkout</h1>
+        
+        <!-- Checkout Steps -->
+        <div class="checkout-steps">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <span class="step-label">Shipping</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <span class="step-label">Review</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <span class="step-label">Payment</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Shipping Form -->
+<section class="checkout-content">
+    <div class="container">
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <div class="form-card">
+                    <h2 class="form-title">Shipping Information</h2>
+                    
+                    <form method="POST" action="{{ url_for('checkout.shipping') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ form.full_name.label }}
+                                {{ form.full_name(class='form-input', placeholder='John Doe') }}
+                                {% if form.full_name.errors %}
+                                <span class="form-error">{{ form.full_name.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ form.phone.label }}
+                                {{ form.phone(class='form-input', placeholder='+1 (555) 123-4567') }}
+                                {% if form.phone.errors %}
+                                <span class="form-error">{{ form.phone.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ form.address_line1.label }}
+                                {{ form.address_line1(class='form-input', placeholder='123 Main Street') }}
+                                {% if form.address_line1.errors %}
+                                <span class="form-error">{{ form.address_line1.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ form.address_line2.label }}
+                                {{ form.address_line2(class='form-input', placeholder='Apt 4B') }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                {{ form.city.label }}
+                                {{ form.city(class='form-input', placeholder='New York') }}
+                                {% if form.city.errors %}
+                                <span class="form-error">{{ form.city.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form.state.label }}
+                                {{ form.state(class='form-input', placeholder='NY') }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                {{ form.postal_code.label }}
+                                {{ form.postal_code(class='form-input', placeholder='10001') }}
+                                {% if form.postal_code.errors %}
+                                <span class="form-error">{{ form.postal_code.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form.country.label }}
+                                {{ form.country(class='form-select') }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                {{ form.save_address() }}
+                                <span class="checkmark"></span>
+                                {{ form.save_address.label.text }}
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline">
+                                <i data-lucide="{{ icons.ICONS.arrow_left }}"></i>
+                                Back to Cart
+                            </a>
+                            {{ form.submit(class='btn btn-primary btn-lg btn-glow') }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="checkout-summary">
+                <div class="summary-card">
+                    <h3 class="summary-title">Order Summary</h3>
+                    
+                    <div class="summary-items">
+                        {% for item in cart.items %}
+                        <div class="summary-item">
+                            <div class="item-image">
+                                {% if item.product.image_url %}
+                                <img src="{{ url_for('static', filename='images/products/' + item.product.image_url) }}" alt="{{ item.product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="item-info">
+                                <span class="item-name">{{ item.product.name }}</span>
+                                <span class="item-variant">{{ item.size.size }} x {{ item.quantity }}</span>
+                            </div>
+                            <span class="item-price">{{ item.get_subtotal()|format_robux }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="summary-divider"></div>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>{{ cart.get_subtotal()|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>Calculated next</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>{{ cart.get_subtotal()|format_robux }} <i data-lucide="{{ icons.ICONS.robux }}"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

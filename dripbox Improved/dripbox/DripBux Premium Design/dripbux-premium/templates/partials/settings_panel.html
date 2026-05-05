@@ -1,0 +1,93 @@
+{# =============================================================================
+   SETTINGS PANEL SIDEBAR - DripBux Premium
+   Sliding panel for site settings and preferences
+   ============================================================================= #}
+<div class="set-overlay" id="setOverlay"></div>
+<aside class="set-sidebar" id="setSidebar" aria-label="Settings Panel">
+    <div class="set-header">
+        <span class="set-header-title">Settings</span>
+        <button class="set-close" id="setClose" aria-label="Close settings panel">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+    <div class="set-body" id="setBody">
+
+        {# ── Preferences Section ─────────────────────────────────────── #}
+        <div class="set-section-label">Preferences</div>
+
+        <a href="{{ url_for('auth.profile') }}" class="set-item">
+            <i data-lucide="user-circle"></i>
+            <span>Account</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </a>
+        <a href="{{ url_for('shop.index') }}" class="set-item">
+            <i data-lucide="palette"></i>
+            <span>Appearance</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </a>
+        <button class="set-item" onclick="DripBuxToast.show('Notification settings coming soon!', 'info')">
+            <i data-lucide="bell"></i>
+            <span>Notifications</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </button>
+        <button class="set-item" onclick="DripBuxToast.show('Privacy settings coming soon!', 'info')">
+            <i data-lucide="shield"></i>
+            <span>Privacy & Security</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </button>
+
+        <div class="set-divider"></div>
+
+        {# ── General Section ─────────────────────────────────────────── #}
+        <div class="set-section-label">General</div>
+
+        <div class="set-toggle-row" onclick="toggleParticlesSetting()">
+            <div>
+                <div class="set-toggle-label">Pink Lightbugs</div>
+                <div class="set-toggle-desc">Floating particle effects</div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="particleToggle" checked onchange="toggleParticlesSetting()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="set-toggle-row" onclick="toggleSoundSetting()">
+            <div>
+                <div class="set-toggle-label">Sound Effects</div>
+                <div class="set-toggle-desc">UI interaction sounds</div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="soundToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <a href="{{ url_for('main.shipping') }}" class="set-item">
+            <i data-lucide="truck"></i>
+            <span>Shipping Info</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </a>
+        <a href="{{ url_for('main.faq') }}" class="set-item">
+            <i data-lucide="help-circle"></i>
+            <span>Help & Support</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </a>
+
+        <div class="set-divider"></div>
+
+        {# ── Advanced Section ────────────────────────────────────────── #}
+        <div class="set-section-label">Advanced</div>
+
+        <button class="set-item" onclick="if(confirm('Clear all local settings?')) { localStorage.clear(); DripBuxToast.show('All settings cleared', 'success'); location.reload(); }">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Reset Settings</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </button>
+        <a href="{{ url_for('main.about') }}" class="set-item">
+            <i data-lucide="info"></i>
+            <span>About DripBux</span>
+            <span class="set-arrow"><i data-lucide="chevron-right"></i></span>
+        </a>
+    </div>
+</aside>

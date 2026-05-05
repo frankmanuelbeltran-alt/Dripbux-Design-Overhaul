@@ -1,0 +1,251 @@
+/* =============================================================================
+   PINK LIGHTBUG PARTICLES - DripBux Premium
+   Floating pink lightbugs that drift along the edges of the page
+   ============================================================================= */
+
+/* ── Particle Canvas Layer ───────────────────────────────────────── */
+.particle-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    overflow: hidden;
+}
+
+/* ── Lightbug Particle ───────────────────────────────────────────── */
+.lightbug {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* Pink glow core */
+.lightbug::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--bug-color, #ff4d8d) 0%, transparent 70%);
+    opacity: 0.8;
+    animation: lightbugPulse 2.5s ease-in-out infinite;
+}
+
+/* Bright center dot */
+.lightbug::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--bug-color, #ff4d8d);
+    box-shadow:
+        0 0 6px var(--bug-color, #ff4d8d),
+        0 0 12px var(--bug-color, #ff4d8d),
+        0 0 20px rgba(255, 77, 141, 0.4);
+}
+
+/* ── Size Variants ───────────────────────────────────────────────── */
+.lightbug.tiny {
+    width: 2px;
+    height: 2px;
+}
+.lightbug.tiny::before {
+    inset: -2px;
+}
+.lightbug.tiny::after {
+    box-shadow:
+        0 0 3px var(--bug-color, #ff4d8d),
+        0 0 6px rgba(255, 77, 141, 0.4);
+}
+
+.lightbug.small {
+    width: 3px;
+    height: 3px;
+}
+.lightbug.small::before {
+    inset: -2px;
+}
+
+.lightbug.large {
+    width: 5px;
+    height: 5px;
+}
+.lightbug.large::before {
+    inset: -5px;
+}
+.lightbug.large::after {
+    box-shadow:
+        0 0 8px var(--bug-color, #ff4d8d),
+        0 0 16px var(--bug-color, #ff4d8d),
+        0 0 30px rgba(255, 77, 141, 0.5);
+}
+
+/* ── Color Variants ──────────────────────────────────────────────── */
+.lightbug.pink {
+    --bug-color: #ff4d8d;
+}
+.lightbug.hot-pink {
+    --bug-color: #ff80ab;
+}
+.lightbug.rose {
+    --bug-color: #ff6b9d;
+}
+.lightbug.deep-pink {
+    --bug-color: #e91e63;
+}
+.lightbug.magenta {
+    --bug-color: #ff4081;
+}
+.lightbug.gold {
+    --bug-color: #ffd700;
+}
+.lightbug.purple {
+    --bug-color: #9d4edd;
+}
+
+/* ── Pulse Animation ─────────────────────────────────────────────── */
+@keyframes lightbugPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+}
+
+/* ── Trail Effect ────────────────────────────────────────────────── */
+.lightbug-trail {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--trail-color, #ff4d8d);
+    pointer-events: none;
+    opacity: 0.3;
+    animation: trailFade 1.5s ease-out forwards;
+}
+
+@keyframes trailFade {
+    0% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+}
+
+/* ── Edge Spawn Zones ────────────────────────────────────────────── */
+/* Particles spawn from edges and drift inward */
+@keyframes driftFromLeft {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(calc(100vw - 20px)) translateY(var(--drift-y, -100px));
+        opacity: 0;
+    }
+}
+
+@keyframes driftFromRight {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(calc(-100vw + 20px)) translateY(var(--drift-y, 100px));
+        opacity: 0;
+    }
+}
+
+@keyframes driftFromTop {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(var(--drift-x, 100px)) translateY(calc(100vh - 20px));
+        opacity: 0;
+    }
+}
+
+@keyframes driftFromBottom {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(var(--drift-x, -100px)) translateY(calc(-100vh + 20px));
+        opacity: 0;
+    }
+}
+
+/* ── Floating Animation (gentle bobbing for static particles) ──── */
+@keyframes gentleFloat {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-15px) translateX(8px);
+    }
+    50% {
+        transform: translateY(-8px) translateX(-5px);
+    }
+    75% {
+        transform: translateY(-20px) translateX(12px);
+    }
+}
+
+/* ── Twinkle (for corner sparkles) ───────────────────────────────── */
+@keyframes twinkle {
+    0%, 100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* ── Reduced Motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .lightbug,
+    .lightbug::before,
+    .lightbug::after {
+        animation: none !important;
+    }
+    .lightbug-trail {
+        display: none;
+    }
+}
