@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Edit User: {{ user.username }}</h1>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="form-row">
+                    <div class="form-group">{{ form.username.label }}{{ form.username(class='form-input') }}</div>
+                    <div class="form-group">{{ form.email.label }}{{ form.email(class='form-input') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.robux_balance.label }}{{ form.robux_balance(class='form-input', type='number') }}</div>
+                    <div class="form-group">{{ form.role.label }}{{ form.role(class='form-input') }}</div>
+                </div>
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">{{ form.is_active() }} <span class="checkbox-text">Active</span></label>
+                <button type="submit" class="btn btn-pink">Save Changes</button>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+
+            <hr style="border:none;border-top:1px solid var(--dark-border);margin:1.5rem 0;">
+            <h3 style="font-size:0.9375rem;margin-bottom:1rem;">Add Robux</h3>
+            <form method="POST" action="{{ url_for('admin.add_robux', user_id=user.id) }}">
+                {{ robux_form.hidden_tag() }}
+                <div class="form-row">
+                    <div class="form-group">{{ robux_form.amount.label }}{{ robux_form.amount(class='form-input', type='number') }}</div>
+                    <div class="form-group">{{ robux_form.reason.label }}{{ robux_form.reason(class='form-input', placeholder='Reason for adding Robux') }}</div>
+                </div>
+                <button type="submit" class="btn btn-success">Add Robux</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

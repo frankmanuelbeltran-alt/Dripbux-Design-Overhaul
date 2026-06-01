@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Vouchers{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Vouchers</h1>
+            <a href="{{ url_for('seller.create_voucher') }}" class="btn btn-pink btn-sm"><i data-lucide="plus"></i> Create Voucher</a>
+        </div>
+        {% if vouchers %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Code</th><th>Discount</th><th>Min Order</th><th>Usage</th><th>Expires</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for v in vouchers %}
+                    <tr>
+                        <td style="font-weight:600;font-family:monospace;">{{ v.code }}</td>
+                        <td>{% if v.discount_type == 'percent' %}{{ v.discount_value }}%{% else %}{{ v.discount_value|format_robux }} Robux{% endif %}</td>
+                        <td>{{ v.min_order_amount|format_robux }}</td>
+                        <td>{{ v.usage_count }}{% if v.usage_limit > 0 %}/{{ v.usage_limit }}{% endif %}</td>
+                        <td style="font-size:0.8125rem;color:var(--text-muted);">{% if v.expires_at %}{{ v.expires_at.strftime('%b %d, %Y') }}{% else %}Never{% endif %}</td>
+                        <td>{% if v.is_valid() %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Inactive</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i data-lucide="ticket" class="empty-icon"></i><p class="empty-desc">No vouchers created yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

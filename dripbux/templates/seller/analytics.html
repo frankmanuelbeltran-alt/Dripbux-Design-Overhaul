@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Seller Analytics{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:1.5rem;">Analytics</h1>
+        <div class="admin-stats-grid" style="margin-bottom:2rem;">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,215,0,0.1);color:var(--accent-gold);"><i data-lucide="coins"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ seller.total_revenue|format_robux }}</span><span class="admin-stat-label">Total Revenue</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(0,230,118,0.1);color:var(--success);"><i data-lucide="shopping-bag"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ seller.total_sales }}</span><span class="admin-stat-label">Total Sales</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,77,141,0.1);color:var(--primary);"><i data-lucide="users"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ seller.follower_count }}</span><span class="admin-stat-label">Followers</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(157,78,221,0.1);color:var(--accent-purple);"><i data-lucide="star"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ seller.rating_average }}</span><span class="admin-stat-label">Rating</span></div>
+            </div>
+        </div>
+        <h2 style="font-family:var(--font-heading);font-weight:600;font-size:1rem;margin-bottom:1rem;">Top Products</h2>
+        {% if top_products %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Product</th><th>Price</th><th>Sales</th><th>Revenue</th></tr></thead>
+                <tbody>
+                    {% for product in top_products %}
+                    <tr>
+                        <td style="display:flex;align-items:center;gap:0.5rem;">
+                            <img src="{{ product.image_url or '/static/images/avatars/default-avatar.png' }}" alt="" style="width:32px;height:32px;border-radius:var(--radius-sm);object-fit:cover;" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            <span style="font-size:0.8125rem;">{{ product.name }}</span>
+                        </td>
+                        <td style="color:var(--accent-gold);">{{ product.price_robux|format_robux }}</td>
+                        <td>{{ product.sales_count or 0 }}</td>
+                        <td style="color:var(--accent-gold);font-weight:600;">{{ ((product.sales_count or 0) * product.price_robux)|format_robux }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="font-size:0.8125rem;color:var(--text-muted);">No sales data yet.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Trending{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h1 class="section-title"><i data-lucide="trending-up" style="width:28px;height:28px;color:var(--success);"></i> Trending Now</h1>
+                <p class="section-subtitle">What's hot this week on DripBux</p>
+            </div>
+        </div>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state"><i data-lucide="trending-up" class="empty-icon"></i><p class="empty-desc">No trending items right now.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

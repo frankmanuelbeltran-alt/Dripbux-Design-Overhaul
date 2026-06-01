@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Edit Profile</h1>
+            <form method="POST" action="" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>Username</label>
+                    {{ form.username(class='form-input') }}
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    {{ form.email(class='form-input', type='email') }}
+                </div>
+                <div class="form-group">
+                    <label>Profile Picture</label>
+                    {{ form.avatar(class='form-input') }}
+                    <p class="form-hint">Upload a new avatar image</p>
+                </div>
+                <button type="submit" class="btn btn-pink">Save Changes</button>
+                <a href="{{ url_for('auth.profile') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

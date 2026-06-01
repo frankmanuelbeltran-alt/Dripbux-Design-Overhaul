@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Admin Dashboard</h1>
+            <span class="badge badge-purple"><i data-lucide="shield" style="width:12px;height:12px;"></i> Admin</span>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(0,176,255,0.1);color:var(--info);"><i data-lucide="users"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.total_users }}</span>
+                    <span class="admin-stat-label">Total Users</span>
+                </div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,77,141,0.1);color:var(--primary);"><i data-lucide="box"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.total_products }}</span>
+                    <span class="admin-stat-label">Products</span>
+                </div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(157,78,221,0.1);color:var(--accent-purple);"><i data-lucide="shopping-bag"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.total_orders }}</span>
+                    <span class="admin-stat-label">Orders</span>
+                </div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,215,0,0.1);color:var(--accent-gold);"><i data-lucide="coins"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.total_revenue|format_robux }}</span>
+                    <span class="admin-stat-label">Total Revenue</span>
+                </div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,196,0,0.1);color:var(--warning);"><i data-lucide="clock"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.pending_orders }}</span>
+                    <span class="admin-stat-label">Pending Orders</span>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.sellers', status='pending') }}" class="admin-stat-card admin-stat-link">
+                <div class="admin-stat-icon" style="background:rgba(0,230,118,0.1);color:var(--success);"><i data-lucide="store"></i></div>
+                <div class="admin-stat-info">
+                    <span class="admin-stat-value">{{ stats.pending_sellers }}</span>
+                    <span class="admin-stat-label">Pending Sellers</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="admin-actions-bar">
+            <a href="{{ url_for('admin.add_product') }}" class="admin-action-btn"><i data-lucide="plus"></i> Add Product</a>
+            <a href="{{ url_for('admin.add_category') }}" class="admin-action-btn"><i data-lucide="folder-plus"></i> Add Category</a>
+            <a href="{{ url_for('admin.add_coupon') }}" class="admin-action-btn"><i data-lucide="ticket"></i> Add Coupon</a>
+            <a href="{{ url_for('admin.add_announcement') }}" class="admin-action-btn"><i data-lucide="megaphone"></i> Announcement</a>
+            <a href="{{ url_for('admin.settings') }}" class="admin-action-btn"><i data-lucide="settings"></i> Settings</a>
+        </div>
+
+        <div class="admin-layout">
+            <!-- Recent Orders -->
+            <div class="admin-panel">
+                <div class="panel-header"><h3 class="panel-title">Recent Orders</h3><a href="{{ url_for('admin.orders') }}" class="view-all-link">View All</a></div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td><a href="{{ url_for('admin.order_detail', order_number=order.order_number) }}" style="color:var(--primary);font-weight:500;">#{{ order.order_number }}</a></td>
+                                <td>{{ order.user.username }}</td>
+                                <td style="color:var(--accent-gold);font-weight:600;">{{ order.total_robux|format_robux }}</td>
+                                <td><span class="order-status-badge status-{{ order.status }}">{{ order.status|title }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="admin-panel">
+                <div class="panel-header"><h3 class="panel-title">Recent Users</h3><a href="{{ url_for('admin.users') }}" class="view-all-link">View All</a></div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>User</th><th>Role</th><th>Joined</th></tr></thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td style="display:flex;align-items:center;gap:0.5rem;">
+                                    <img src="{{ user.get_avatar() }}" alt="" style="width:28px;height:28px;border-radius:50%;" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                                    {{ user.username }}
+                                </td>
+                                <td><span class="badge badge-{{ 'purple' if user.is_admin else 'green' if user.is_seller else 'blue' }}">{{ user.role|title }}</span></td>
+                                <td style="font-size:0.8125rem;color:var(--text-muted);">{{ user.created_at.strftime('%b %d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Logs -->
+        <div class="admin-panel" style="margin-top:1.5rem;">
+            <div class="panel-header"><h3 class="panel-title">Activity Log</h3></div>
+            <div class="activity-log">
+                {% for log in recent_logs %}
+                <div class="activity-item">
+                    <span class="activity-action">{{ log.action|title }}</span>
+                    <span class="activity-entity">{{ log.entity_type }} {% if log.entity_id %}#{{ log.entity_id }}{% endif %}</span>
+                    <span class="activity-time">{{ log.created_at.strftime('%b %d, %H:%M') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.admin-stat-card { display: flex; align-items: center; gap: 0.875rem; padding: 1rem; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); transition: all 0.2s; }
+.admin-stat-card:hover { border-color: rgba(255,77,141,0.2); }
+.admin-stat-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.admin-stat-icon i { width: 20px; height: 20px; }
+.admin-stat-info { display: flex; flex-direction: column; }
+.admin-stat-value { font-family: var(--font-heading); font-weight: 700; font-size: 1.25rem; }
+.admin-stat-label { font-size: 0.75rem; color: var(--text-muted); }
+.admin-actions-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.admin-action-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); transition: all 0.2s; }
+.admin-action-btn:hover { background: rgba(255,77,141,0.1); border-color: var(--primary); color: var(--text-primary); }
+.admin-action-btn i { width: 16px; height: 16px; }
+.admin-stat-link { display: flex; text-decoration: none; color: inherit; }
+.admin-stat-link:hover { border-color: rgba(0,230,118,0.3); }
+.admin-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.admin-panel { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); padding: 1.25rem; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.panel-title { font-family: var(--font-heading); font-weight: 600; font-size: 0.9375rem; }
+.activity-log { display: flex; flex-direction: column; }
+.activity-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--dark-border); font-size: 0.8125rem; }
+.activity-item:last-child { border-bottom: none; }
+.activity-action { font-weight: 500; color: var(--primary); min-width: 60px; }
+.activity-entity { flex: 1; color: var(--text-secondary); }
+.activity-time { font-size: 0.75rem; color: var(--text-muted); }
+@media (max-width: 992px) { .admin-layout { grid-template-columns: 1fr; } .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+{% endblock %}

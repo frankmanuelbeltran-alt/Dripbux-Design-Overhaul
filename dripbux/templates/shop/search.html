@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="shop-header">
+            <div>
+                <h1 class="section-title">{% if query %}Results for "{{ query }}"{% else %}Search{% endif %}</h1>
+                {% if pagination %}<p class="section-subtitle">{{ pagination.total }} items found</p>{% endif %}
+            </div>
+            <select class="sort-select" onchange="window.location.href=this.value" style="width:auto;">
+                {% set base = url_for('shop.search', q=query) %}
+                <option value="{{ base }}&sort=newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="{{ base }}&sort=price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low</option>
+                <option value="{{ base }}&sort=price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High</option>
+                <option value="{{ base }}&sort=popular" {% if sort == 'popular' %}selected{% endif %}>Popular</option>
+            </select>
+        </div>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state">
+            <i data-lucide="search" class="empty-icon"></i>
+            <p class="empty-title">No results found</p>
+            <p class="empty-desc">{% if query %}Try different keywords or browse our categories.{% else %}Enter a search term to find products.{% endif %}</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-pink btn-sm">Browse All</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

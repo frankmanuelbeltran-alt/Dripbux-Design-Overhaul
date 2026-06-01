@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Users</h1>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <form method="get" action="" class="search-form" style="flex:1;max-width:300px;margin:0;">
+                <input type="text" name="q" class="search-input" placeholder="Search users..." value="{{ search }}" style="padding:0.5rem 2.5rem 0.5rem 0.75rem;font-size:0.8125rem;">
+                <button type="submit" class="search-btn" style="width:28px;height:28px;right:4px;"><i data-lucide="search" style="width:12px;height:12px;"></i></button>
+            </form>
+            <a href="{{ url_for('admin.add_user') }}" class="btn btn-sm btn-primary">New User</a>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-sm {% if not role %}btn-pink{% else %}btn-dark{% endif %}">All</a>
+            <a href="{{ url_for('admin.users', role='customer') }}" class="btn btn-sm {% if role == 'customer' %}btn-pink{% else %}btn-dark{% endif %}">Customers</a>
+            <a href="{{ url_for('admin.users', role='seller') }}" class="btn btn-sm {% if role == 'seller' %}btn-pink{% else %}btn-dark{% endif %}">Sellers</a>
+            <a href="{{ url_for('admin.users', role='admin') }}" class="btn btn-sm {% if role == 'admin' %}btn-pink{% else %}btn-dark{% endif %}">Admins</a>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr><th>User</th><th>Email</th><th>Role</th><th>Balance</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td style="display:flex;align-items:center;gap:0.5rem;">
+                            <img src="{{ user.get_avatar() }}" alt="" style="width:32px;height:32px;border-radius:50%;" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            {{ user.username }}
+                        </td>
+                        <td style="font-size:0.8125rem;">{{ user.email }}</td>
+                        <td><span class="badge badge-{{ 'purple' if user.is_admin else 'green' if user.is_seller else 'blue' }}">{{ user.role|title }}</span></td>
+                        <td style="color:var(--accent-gold);font-weight:600;">{{ user.robux_balance|format_robux }}</td>
+                        <td>{% if user.is_active %}<span style="color:var(--success);font-size:0.8125rem;">Active</span>{% else %}<span style="color:var(--error);font-size:0.8125rem;">Inactive</span>{% endif %}</td>
+                        <td style="font-size:0.8125rem;color:var(--text-muted);">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                        <td><a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-dark">Edit</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/pagination.html' %}
+    </div>
+</section>
+{% endblock %}

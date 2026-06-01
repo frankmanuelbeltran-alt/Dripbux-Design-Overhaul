@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}About{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow" style="text-align:center;">
+        <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,77,141,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+            <i data-lucide="diamond" style="width:36px;height:36px;color:var(--primary);"></i>
+        </div>
+        <h1 class="section-title" style="font-size:2rem;margin-bottom:1rem;">About {{ app_name }}</h1>
+        <p style="font-size:1rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem;">
+            {{ app_name }} is the ultimate Roblox-inspired marketplace built for the community. 
+            We bring together buyers and sellers in a premium, gaming-themed e-commerce experience 
+            where all transactions use Robux currency.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-bottom:2rem;">
+            <div class="glass-panel" style="padding:1.5rem;">
+                <i data-lucide="shield" style="width:24px;height:24px;color:var(--primary);margin-bottom:0.5rem;"></i>
+                <h3 style="font-weight:600;margin-bottom:0.25rem;">Secure</h3>
+                <p style="font-size:0.8125rem;color:var(--text-muted);">Safe transactions with Robux</p>
+            </div>
+            <div class="glass-panel" style="padding:1.5rem;">
+                <i data-lucide="zap" style="width:24px;height:24px;color:var(--accent-gold);margin-bottom:0.5rem;"></i>
+                <h3 style="font-weight:600;margin-bottom:0.25rem;">Fast</h3>
+                <p style="font-size:0.8125rem;color:var(--text-muted);">Instant digital delivery</p>
+            </div>
+            <div class="glass-panel" style="padding:1.5rem;">
+                <i data-lucide="users" style="width:24px;height:24px;color:var(--accent-purple);margin-bottom:0.5rem;"></i>
+                <h3 style="font-weight:600;margin-bottom:0.25rem;">Community</h3>
+                <p style="font-size:0.8125rem;color:var(--text-muted);">Built for Roblox players</p>
+            </div>
+            <div class="glass-panel" style="padding:1.5rem;">
+                <i data-lucide="heart" style="width:24px;height:24px;color:var(--error);margin-bottom:0.5rem;"></i>
+                <h3 style="font-weight:600;margin-bottom:0.25rem;">Passion</h3>
+                <p style="font-size:0.8125rem;color:var(--text-muted);">Made with love for gaming</p>
+            </div>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;display:flex;justify-content:space-around;flex-wrap:wrap;gap:1rem;">
+            <div style="text-align:center;"><span style="font-family:var(--font-heading);font-weight:700;font-size:1.5rem;color:var(--primary);">{{ stats.products }}</span><p style="font-size:0.75rem;color:var(--text-muted);">Products</p></div>
+            <div style="text-align:center;"><span style="font-family:var(--font-heading);font-weight:700;font-size:1.5rem;color:var(--accent-cyan);">{{ stats.users }}</span><p style="font-size:0.75rem;color:var(--text-muted);">Users</p></div>
+            <div style="text-align:center;"><span style="font-family:var(--font-heading);font-weight:700;font-size:1.5rem;color:var(--accent-gold);">{{ stats.orders }}</span><p style="font-size:0.75rem;color:var(--text-muted);">Orders</p></div>
+            <div style="text-align:center;"><span style="font-family:var(--font-heading);font-weight:700;font-size:1.5rem;color:var(--accent-purple);">{{ stats.sellers }}</span><p style="font-size:0.75rem;color:var(--text-muted);">Sellers</p></div>
+        </div>
+    </div>
+</section>
+{% endblock %}

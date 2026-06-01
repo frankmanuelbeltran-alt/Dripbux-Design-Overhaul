@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - Shipping{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="checkout-steps">
+            <div class="step active"><span class="step-num">1</span><span class="step-label">Shipping</span></div>
+            <div class="step-line"></div>
+            <div class="step"><span class="step-num">2</span><span class="step-label">Review</span></div>
+            <div class="step-line"></div>
+            <div class="step"><span class="step-num">3</span><span class="step-label">Payment</span></div>
+        </div>
+
+        <div class="checkout-card glass-panel">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Shipping Information</h1>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="form-row">
+                    <div class="form-group">{{ form.full_name.label }}{{ form.full_name(class='form-input') }}</div>
+                    <div class="form-group">{{ form.phone.label }}{{ form.phone(class='form-input') }}</div>
+                </div>
+                <div class="form-group">{{ form.address_line1.label }}{{ form.address_line1(class='form-input') }}</div>
+                <div class="form-group">{{ form.address_line2.label }}{{ form.address_line2(class='form-input') }}</div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.city.label }}{{ form.city(class='form-input') }}</div>
+                    <div class="form-group">{{ form.state.label }}{{ form.state(class='form-input') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.postal_code.label }}{{ form.postal_code(class='form-input') }}</div>
+                    <div class="form-group">{{ form.country.label }}{{ form.country(class='form-input') }}</div>
+                </div>
+
+                <div class="shipping-options">
+                    <h3 class="shipping-options-title">Shipping Method</h3>
+                    <div class="shipping-option">
+                        {{ form.shipping_method(class='shipping-radio') }}
+                        <div class="shipping-option-info">
+                            <span class="shipping-option-name">Standard Shipping</span>
+                            <span class="shipping-option-desc">5-7 business days</span>
+                        </div>
+                        <span class="shipping-option-price free">FREE</span>
+                    </div>
+                    <div class="shipping-option">
+                        <input type="radio" name="shipping_method" value="express" class="shipping-radio" {% if form.shipping_method.data == 'express' %}checked{% endif %}>
+                        <div class="shipping-option-info">
+                            <span class="shipping-option-name">Express Shipping</span>
+                            <span class="shipping-option-desc">2-3 business days</span>
+                        </div>
+                        <span class="shipping-option-price">199 <i data-lucide="coins" style="width:12px;height:12px;"></i></span>
+                    </div>
+                </div>
+
+                <div class="form-group form-checkbox">
+                    <label class="checkbox-label">{{ form.save_address() }} <span class="checkbox-text">Save this address for future orders</span></label>
+                </div>
+
+                <div class="checkout-actions">
+                    <a href="{{ url_for('cart.view_cart') }}" class="btn btn-dark"><i data-lucide="arrow-left"></i> Back to Cart</a>
+                    {{ form.submit(class='btn btn-pink btn-lg', value='Continue to Review') }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.checkout-steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 2rem; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; }
+.step-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--dark-elevated); border: 2px solid var(--dark-border); font-size: 0.8125rem; font-weight: 700; color: var(--text-muted); transition: all 0.3s; }
+.step.active .step-num { background: var(--primary); border-color: var(--primary); color: white; box-shadow: var(--shadow-pink); }
+.step-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+.step-line { width: 60px; height: 2px; background: var(--dark-border); margin: 0 0.5rem; margin-bottom: 1.25rem; }
+.checkout-card { padding: 2rem; }
+.form-input { padding: 0.75rem 1rem; }
+.shipping-options { margin: 1.5rem 0; }
+.shipping-options-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.75rem; }
+.shipping-option { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid var(--dark-border); border-radius: var(--radius-sm); margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; }
+.shipping-option:hover, .shipping-option:has(.shipping-radio:checked) { border-color: var(--primary); background: rgba(255,77,141,0.05); }
+.shipping-radio { width: auto; accent-color: var(--primary); }
+.shipping-option-info { flex: 1; }
+.shipping-option-name { display: block; font-weight: 600; font-size: 0.875rem; }
+.shipping-option-desc { font-size: 0.75rem; color: var(--text-muted); }
+.shipping-option-price { font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+.shipping-option-price.free { color: var(--success); }
+.checkout-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+@media (max-width: 600px) { .checkout-actions { flex-direction: column; } .checkout-actions .btn { width: 100%; } .step-line { width: 30px; } }
+</style>
+{% endblock %}

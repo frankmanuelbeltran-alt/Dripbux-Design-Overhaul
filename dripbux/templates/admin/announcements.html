@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Announcements{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Announcements</h1>
+            <a href="{{ url_for('admin.add_announcement') }}" class="btn btn-pink btn-sm"><i data-lucide="plus"></i> New</a>
+        </div>
+        {% if announcements %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% for ann in announcements %}
+            <div class="card" style="padding:1.25rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+                            <span class="badge badge-{{ 'blue' if ann.announcement_type == 'info' else 'warning' if ann.announcement_type == 'warning' else 'green' if ann.announcement_type == 'success' else 'pink' }}">{{ ann.announcement_type|title }}</span>
+                            {% if ann.is_active %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Inactive</span>{% endif %}
+                        </div>
+                        <h3 style="font-weight:600;">{{ ann.title }}</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-secondary);">{{ ann.content }}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;white-space:nowrap;">
+                        <span style="font-size:0.75rem;color:var(--text-muted);">{{ ann.created_at.strftime('%b %d, %Y') }}</span>
+                        <form method="POST" action="{{ url_for('admin.delete_announcement', announcement_id=ann.id) }}" style="display:inline;" onsubmit="return confirm('Delete this announcement?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-danger"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state"><i data-lucide="megaphone" class="empty-icon"></i><p class="empty-desc">No announcements yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

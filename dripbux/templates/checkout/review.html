@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - Review{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="checkout-steps">
+            <div class="step completed"><span class="step-num"><i data-lucide="check" style="width:16px;height:16px;"></i></span><span class="step-label">Shipping</span></div>
+            <div class="step-line active"></div>
+            <div class="step active"><span class="step-num">2</span><span class="step-label">Review</span></div>
+            <div class="step-line"></div>
+            <div class="step"><span class="step-num">3</span><span class="step-label">Payment</span></div>
+        </div>
+
+        <div class="checkout-card glass-panel">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Review Order</h1>
+
+            <div class="review-section">
+                <h3 class="review-heading">Shipping To</h3>
+                <div class="review-box">
+                    <p style="font-weight:600;">{{ shipping_info.full_name }}</p>
+                    <p style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">
+                        {{ shipping_info.address_line1 }}<br>
+                        {% if shipping_info.address_line2 %}{{ shipping_info.address_line2 }}<br>{% endif %}
+                        {{ shipping_info.city }}, {{ shipping_info.state }} {{ shipping_info.postal_code }}<br>
+                        {{ shipping_info.country }}<br>
+                        {{ shipping_info.phone }}
+                    </p>
+                    <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.5rem;">
+                        <i data-lucide="truck" style="width:14px;height:14px;display:inline;"></i>
+                        {{ shipping_info.shipping_method|title }} Shipping
+                        {% if shipping_fee == 0 %}<span style="color:var(--success);">(FREE)</span>{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="review-section">
+                <h3 class="review-heading">Items</h3>
+                {% for item in cart.items %}
+                <div class="review-item">
+                    <img src="{{ item.product.image_url or '/static/images/avatars/default-avatar.png' }}" alt="" class="review-item-img" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                    <div class="review-item-info">
+                        <p class="review-item-name">{{ item.product.name }}</p>
+                        {% if item.size %}<p class="review-item-variant">{{ item.size.size }}</p>{% endif %}
+                    </div>
+                    <span class="review-item-qty">x{{ item.quantity }}</span>
+                    <span class="review-item-price">{{ item.get_subtotal()|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i></span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Coupon -->
+            <div class="review-section">
+                <h3 class="review-heading">Coupon</h3>
+                <form method="POST" action="" class="coupon-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" name="coupon_code" class="form-input" placeholder="Enter coupon code" value="{{ coupon_code or '' }}" style="text-transform:uppercase;">
+                    <button type="submit" class="btn btn-pink">Apply</button>
+                </form>
+                {% if discount > 0 %}
+                <p style="font-size:0.8125rem;color:var(--success);margin-top:0.5rem;">
+                    <i data-lucide="check-circle" style="width:14px;height:14px;display:inline;"></i> Coupon applied! You saved {{ discount|format_robux }} Robux
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="review-summary">
+                <div class="review-summary-row"><span>Subtotal</span><span>{{ subtotal|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i></span></div>
+                <div class="review-summary-row"><span>Shipping</span><span>{% if shipping_fee == 0 %}<span style="color:var(--success);">FREE</span>{% else %}{{ shipping_fee|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i>{% endif %}</span></div>
+                {% if discount > 0 %}
+                <div class="review-summary-row" style="color:var(--success);"><span>Discount</span><span>-{{ discount|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i></span></div>
+                {% endif %}
+                <div class="review-summary-row review-total"><span>Total</span><span>{{ total|format_robux }} <i data-lucide="coins" style="width:16px;height:16px;"></i></span></div>
+                <div class="review-balance">
+                    <span>Your Balance</span>
+                    <span style="color:{% if user_balance >= total %}var(--success){% else %}var(--error){% endif %};">{{ user_balance|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i></span>
+                </div>
+                {% if user_balance < total %}
+                <p style="font-size:0.8125rem;color:var(--error);margin-top:0.5rem;">
+                    <i data-lucide="alert-circle" style="width:14px;height:14px;display:inline;"></i> Insufficient Robux. Need {{ total|format_robux }} Robux.
+                </p>
+                {% endif %}
+            </div>
+
+            <form method="POST" action="" class="checkout-actions" style="margin-top:1.5rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <a href="{{ url_for('checkout.shipping') }}" class="btn btn-dark"><i data-lucide="arrow-left"></i> Back</a>
+                <input type="hidden" name="place_order" value="1">
+                <button type="submit" class="btn btn-pink btn-lg" {% if user_balance < total %}disabled{% endif %}>
+                    Proceed to Payment <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.step.completed .step-num { background: var(--success); border-color: var(--success); color: #000; }
+.step-line.active { background: linear-gradient(90deg, var(--success), var(--primary)); }
+.checkout-card { padding: 2rem; }
+.review-section { margin-bottom: 1.5rem; }
+.review-heading { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.625rem; }
+.review-box { background: var(--dark-elevated); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 1rem; font-size: 0.875rem; }
+.review-item { display: grid; grid-template-columns: 56px 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--dark-border); }
+.review-item:last-child { border-bottom: none; }
+.review-item-img { width: 56px; height: 56px; border-radius: var(--radius-sm); object-fit: cover; }
+.review-item-info { min-width: 0; }
+.review-item-name { font-weight: 500; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.review-item-variant { font-size: 0.75rem; color: var(--text-muted); }
+.review-item-qty { font-size: 0.8125rem; color: var(--text-muted); }
+.review-item-price { font-weight: 600; color: var(--accent-gold); white-space: nowrap; min-width: 80px; text-align: right; }
+.coupon-form { display: flex; gap: 0.5rem; }
+.coupon-form .form-input { flex: 1; }
+.review-summary { background: var(--dark-elevated); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 1rem; }
+.review-summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.875rem; color: var(--text-secondary); }
+.review-total { border-top: 1px solid var(--dark-border); margin-top: 0.5rem; padding-top: 0.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.125rem; color: var(--text-primary); }
+.review-balance { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.8125rem; color: var(--text-muted); border-top: 1px solid var(--dark-border); margin-top: 0.5rem; }
+@media (max-width: 600px) { .review-item { grid-template-columns: 48px 1fr auto; } .review-item-qty { display: none; } }
+</style>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Best Sellers{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h1 class="section-title"><i data-lucide="award" style="width:28px;height:28px;color:var(--accent-gold);"></i> Best Sellers</h1>
+                <p class="section-subtitle">Community favorites and top picks</p>
+            </div>
+        </div>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state"><i data-lucide="award" class="empty-icon"></i><p class="empty-desc">No best sellers yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

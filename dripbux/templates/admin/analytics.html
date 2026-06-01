@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:1.5rem;">Platform Analytics</h1>
+        <div class="admin-stats-grid" style="margin-bottom:2rem;">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(255,215,0,0.1);color:var(--accent-gold);"><i data-lucide="coins"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ total_revenue|format_robux }}</span><span class="admin-stat-label">Total Revenue</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(0,176,255,0.1);color:var(--info);"><i data-lucide="box"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ product_stats.total }}</span><span class="admin-stat-label">Products</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(0,230,118,0.1);color:var(--success);"><i data-lucide="users"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ user_stats.total }}</span><span class="admin-stat-label">Users</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background:rgba(157,78,221,0.1);color:var(--accent-purple);"><i data-lucide="store"></i></div>
+                <div class="admin-stat-info"><span class="admin-stat-value">{{ user_stats.sellers }}</span><span class="admin-stat-label">Sellers</span></div>
+            </div>
+        </div>
+
+        <h2 style="font-family:var(--font-heading);font-weight:600;font-size:1rem;margin-bottom:1rem;">Monthly Revenue</h2>
+        <div class="glass-panel" style="padding:1.5rem;">
+            <div style="display:flex;align-items:flex-end;gap:0.75rem;height:200px;">
+                {% for m in monthly_revenue %}
+                {% set max_rev = monthly_revenue|map(attribute='revenue')|max %}
+                {% set height = (m.revenue / max_rev * 100) if max_rev > 0 else 0 %}
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.375rem;">
+                    <span style="font-size:0.6875rem;color:var(--accent-gold);font-weight:600;">{{ m.revenue|format_robux }}</span>
+                    <div style="width:100%;height:{{ height }}%;background:linear-gradient(to top,var(--primary),var(--primary-light));border-radius:var(--radius-sm) var(--radius-sm) 0 0;min-height:4px;transition:height 0.5s ease;"></div>
+                    <span style="font-size:0.6875rem;color:var(--text-muted);">{{ m.month }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

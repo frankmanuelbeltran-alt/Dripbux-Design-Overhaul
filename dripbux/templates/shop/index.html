@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}{{ current_category.name if current_category else 'Shop' }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="shop-layout">
+            <!-- Sidebar Filters -->
+            <aside class="shop-sidebar">
+                <div class="filter-panel glass-panel">
+                    <h3 class="filter-title"><i data-lucide="sliders-horizontal"></i> Filters</h3>
+                    <div class="filter-group">
+                        <h4 class="filter-heading">Categories</h4>
+                        <div class="filter-options">
+                            <a href="{{ url_for('shop.index') }}" class="filter-option {% if not current_category %}active{% endif %}">All Categories</a>
+                            {% for cat in categories %}
+                            <a href="{{ url_for('shop.index', category=cat.slug) }}" class="filter-option {% if current_category and current_category.id == cat.id %}active{% endif %}">{{ cat.name }} ({{ cat.get_product_count() }})</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <h4 class="filter-heading">Price Range</h4>
+                        <form method="get" action="{{ url_for('shop.index') }}" class="filter-price">
+                            {% if current_category %}<input type="hidden" name="category" value="{{ current_category.slug }}">{% endif %}
+                            <input type="number" name="min_price" placeholder="Min" class="filter-input" value="{{ min_price or '' }}">
+                            <input type="number" name="max_price" placeholder="Max" class="filter-input" value="{{ max_price or '' }}">
+                            <button type="submit" class="btn btn-pink btn-sm">Apply</button>
+                        </form>
+                    </div>
+                    <div class="filter-group">
+                        <h4 class="filter-heading">Rarity</h4>
+                        <div class="filter-options">
+                            {% for r in [('common','Common'),('uncommon','Uncommon'),('rare','Rare'),('epic','Epic'),('legendary','Legendary'),('mythic','Mythic')] %}
+                            <a href="{{ url_for('shop.index', rarity=r[0], category=current_category.slug if current_category else '') }}" class="filter-option rarity-option rarity-{{ r[0] }} {% if request.args.get('rarity') == r[0] %}active{% endif %}">
+                                <span class="rarity-dot" style="background:var(--rarity-{{ r[0] }})"></span>{{ r[1] }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main -->
+            <div class="shop-main">
+                <div class="shop-header">
+                    <h1 class="section-title">{{ current_category.name if current_category else 'All Products' }}</h1>
+                    <div class="shop-sort">
+                        <span style="font-size:0.8125rem;color:var(--text-muted);">{{ pagination.total if pagination else products|length }} items</span>
+                        <select class="sort-select" onchange="window.location.href=this.value">
+                            {% set base = url_for('shop.index', category=current_category.slug if current_category else None) %}
+                            <option value="{{ base }}&sort=newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                            <option value="{{ base }}&sort=price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="{{ base }}&sort=price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="{{ base }}&sort=popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                        </select>
+                    </div>
+                </div>
+
+                {% if products %}
+                <div class="products-grid">
+                    {% for product in products %}
+                    {% include 'partials/product_card.html' %}
+                    {% endfor %}
+                </div>
+                {% include 'partials/pagination.html' %}
+                {% else %}
+                <div class="empty-state">
+                    <i data-lucide="search" class="empty-icon"></i>
+                    <p class="empty-desc">No products found matching your criteria.</p>
+                    <a href="{{ url_for('shop.index') }}" class="btn btn-pink btn-sm">View All</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.shop-layout { display: grid; grid-template-columns: 240px 1fr; gap: 2rem; }
+.filter-panel { padding: 1.25rem; }
+.filter-title { font-family: var(--font-heading); font-weight: 600; font-size: 0.9375rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.filter-title i { width: 16px; height: 16px; color: var(--primary); }
+.filter-group { margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--dark-border); }
+.filter-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.filter-heading { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.625rem; }
+.filter-options { display: flex; flex-direction: column; gap: 0.125rem; }
+.filter-option { padding: 0.375rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--text-secondary); transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+.filter-option:hover { color: var(--text-primary); background: var(--dark-elevated); }
+.filter-option.active { color: var(--primary); background: rgba(255, 77, 141, 0.1); font-weight: 500; }
+.rarity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.filter-price { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; align-items: center; }
+.filter-input { padding: 0.5rem; font-size: 0.8125rem; }
+.shop-main { min-width: 0; }
+.shop-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.shop-sort { display: flex; align-items: center; gap: 0.75rem; }
+.sort-select { padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.8125rem; border-radius: var(--radius-sm); background: var(--dark-card); border: 1px solid var(--dark-border); color: var(--text-primary); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a80' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; }
+@media (max-width: 992px) { .shop-layout { grid-template-columns: 1fr; } .shop-sidebar { display: none; } }
+</style>
+{% endblock %}

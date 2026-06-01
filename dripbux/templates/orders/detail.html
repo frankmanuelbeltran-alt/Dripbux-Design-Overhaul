@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="order-detail-header">
+            <div>
+                <h1 class="section-title">Order #{{ order.order_number }}</h1>
+                <p style="font-size:0.8125rem;color:var(--text-muted);">Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            </div>
+            <span class="order-status-badge status-{{ order.status }}">{{ order.status|title }}</span>
+        </div>
+
+        <div class="order-detail-grid">
+            <!-- Items -->
+            <div class="order-detail-card">
+                <h3 class="order-detail-heading">Items</h3>
+                {% for item in order.items %}
+                <div class="order-item-row">
+                    <img src="{{ item.product_image or '/static/images/avatars/default-avatar.png' }}" alt="" class="order-item-img" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                    <div class="order-item-info">
+                        <p style="font-weight:500;font-size:0.875rem;">{{ item.product_name }}</p>
+                        {% if item.size %}<p style="font-size:0.75rem;color:var(--text-muted);">Variant: {{ item.size }}</p>{% endif %}
+                        <p style="font-size:0.8125rem;color:var(--text-muted);">Qty: {{ item.quantity }} x {{ item.price_robux|format_robux }}</p>
+                    </div>
+                    <span style="font-weight:600;color:var(--accent-gold);white-space:nowrap;">{{ item.get_subtotal()|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;display:inline;"></i></span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Summary -->
+            <div class="order-detail-card">
+                <h3 class="order-detail-heading">Order Summary</h3>
+                <div class="order-summary-row"><span>Subtotal</span><span>{{ order.subtotal_robux|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;display:inline;"></i></span></div>
+                <div class="order-summary-row"><span>Shipping</span><span>{% if order.shipping_fee == 0 %}FREE{% else %}{{ order.shipping_fee|format_robux }}{% endif %}</span></div>
+                {% if order.discount_amount > 0 %}
+                <div class="order-summary-row" style="color:var(--success);"><span>Discount</span><span>-{{ order.discount_amount|format_robux }}</span></div>
+                {% endif %}
+                <div class="order-summary-row order-total-row"><span>Total</span><span>{{ order.total_robux|format_robux }} <i data-lucide="coins" style="width:14px;height:14px;display:inline;"></i></span></div>
+            </div>
+
+            <!-- Shipping -->
+            <div class="order-detail-card">
+                <h3 class="order-detail-heading">Shipping Details</h3>
+                <p style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">{{ order.shipping_name }}</p>
+                <p style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">{{ order.shipping_address|replace(',', '<br>')|safe }}</p>
+                <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.5rem;"><i data-lucide="phone" style="width:14px;height:14px;display:inline;"></i> {{ order.shipping_phone }}</p>
+                <p style="font-size:0.8125rem;color:var(--text-muted);"><i data-lucide="truck" style="width:14px;height:14px;display:inline;"></i> {{ order.shipping_method|title }} Shipping</p>
+                {% if order.tracking_number %}
+                <p style="font-size:0.8125rem;color:var(--primary);margin-top:0.5rem;"><i data-lucide="map-pin" style="width:14px;height:14px;display:inline;"></i> Tracking: {{ order.tracking_number }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if order.can_cancel() %}
+        <div style="margin-top:1.5rem;">
+            <div class="cancel-order-card">
+                <h3 class="order-detail-heading">Cancel this order</h3>
+                <form method="POST" action="{{ url_for('orders.cancel_order', order_number=order.order_number) }}">
+                    {{ cancel_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label>{{ cancel_form.reason.label.text }}</label>
+                        <select name="{{ cancel_form.reason.name }}" id="{{ cancel_form.reason.id }}" class="form-input">
+                            <option value="" disabled selected hidden>Select a reason</option>
+                            {% for value, label in cancel_form.reason.choices %}
+                                <option value="{{ value }}" {% if cancel_form.reason.data == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" id="customReasonField" style="display:none;">
+                        <label>{{ cancel_form.custom_reason.label.text }}</label>
+                        {{ cancel_form.custom_reason(class='form-input', placeholder='Describe your reason') }}
+                    </div>
+                    <button type="submit" class="btn btn-danger">Cancel Order & Refund</button>
+                </form>
+            </div>
+        </div>
+        <script>
+            const cancelReasonSelect = document.querySelector('select[name="reason"]');
+            const customReasonField = document.getElementById('customReasonField');
+            if (cancelReasonSelect) {
+                cancelReasonSelect.addEventListener('change', function() {
+                    customReasonField.style.display = this.value === 'other' ? 'block' : 'none';
+                });
+            }
+        </script>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.order-detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.order-detail-grid { display: flex; flex-direction: column; gap: 1rem; }
+.order-detail-card { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: var(--radius-lg); padding: 1.25rem; }
+.order-detail-heading { font-family: var(--font-heading); font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.75rem; }
+.order-item-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--dark-border); }
+.order-item-row:last-child { border-bottom: none; }
+.order-item-img { width: 56px; height: 56px; border-radius: var(--radius-sm); object-fit: cover; }
+.order-item-info { flex: 1; min-width: 0; }
+.order-summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.875rem; color: var(--text-secondary); }
+.order-total-row { border-top: 1px solid var(--dark-border); margin-top: 0.5rem; padding-top: 0.75rem; font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+.order-status-badge { padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; }
+</style>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Seller Guide{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div style="text-align:center;margin-bottom:2rem;">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,77,141,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                <i data-lucide="store" style="width:28px;height:28px;color:var(--primary);"></i>
+            </div>
+            <h1 class="section-title">Seller Guide</h1>
+            <p style="font-size:0.9375rem;color:var(--text-secondary);">Start selling on DripBux in 3 easy steps</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+            <div class="glass-panel" style="padding:1.5rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                    <span style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;">1</span>
+                    <h3 style="font-weight:600;">Apply to Become a Seller</h3>
+                </div>
+                <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.7;">Go to your profile and click "Become a Seller". Fill out your store name and description. Our team will review your application.</p>
+            </div>
+            <div class="glass-panel" style="padding:1.5rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                    <span style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;">2</span>
+                    <h3 style="font-weight:600;">List Your Products</h3>
+                </div>
+                <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.7;">Once approved, add products from your seller dashboard. Upload images, set prices in Robux, and choose categories.</p>
+            </div>
+            <div class="glass-panel" style="padding:1.5rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                    <span style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;">3</span>
+                    <h3 style="font-weight:600;">Start Earning</h3>
+                </div>
+                <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.7;">When customers buy your products, Robux is added to your balance. Use the analytics dashboard to track sales and grow your store.</p>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:2rem;">
+            <a href="{{ url_for('seller.apply') }}" class="btn btn-pink btn-lg">Apply Now</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Flash Sales{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h1 class="section-title"><i data-lucide="flame" style="width:28px;height:28px;color:var(--error);"></i> Flash Sales</h1>
+                <p class="section-subtitle">Limited time deals at unbeatable prices</p>
+            </div>
+        </div>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state"><i data-lucide="flame" class="empty-icon"></i><p class="empty-desc">No flash sales active right now. Check back soon!</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

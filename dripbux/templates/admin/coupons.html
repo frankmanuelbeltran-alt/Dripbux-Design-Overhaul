@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Coupons{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Coupons</h1>
+            <a href="{{ url_for('admin.add_coupon') }}" class="btn btn-pink btn-sm"><i data-lucide="plus"></i> Add Coupon</a>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Usage</th><th>Status</th><th>Expires</th></tr></thead>
+                <tbody>
+                    {% for coupon in coupons.items %}
+                    <tr>
+                        <td style="font-weight:600;font-family:monospace;">{{ coupon.code }}</td>
+                        <td>{{ coupon.discount_type|title }}</td>
+                        <td>{% if coupon.discount_type == 'percent' %}{{ coupon.discount_value }}%{% else %}{{ coupon.discount_value|format_robux }}{% endif %}</td>
+                        <td>{{ coupon.usage_count }}{% if coupon.usage_limit > 0 %}/{{ coupon.usage_limit }}{% else %}/&infin;{% endif %}</td>
+                        <td>{% if coupon.is_valid() %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Inactive</span>{% endif %}</td>
+                        <td style="font-size:0.8125rem;color:var(--text-muted);">{% if coupon.expires_at %}{{ coupon.expires_at.strftime('%b %d, %Y') }}{% else %}Never{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/pagination.html' %}
+    </div>
+</section>
+{% endblock %}

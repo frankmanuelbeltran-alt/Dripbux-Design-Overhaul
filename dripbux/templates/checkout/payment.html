@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - Payment{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="checkout-steps">
+            <div class="step completed"><span class="step-num"><i data-lucide="check" style="width:16px;height:16px;"></i></span><span class="step-label">Shipping</span></div>
+            <div class="step-line active"></div>
+            <div class="step completed"><span class="step-num"><i data-lucide="check" style="width:16px;height:16px;"></i></span><span class="step-label">Review</span></div>
+            <div class="step-line active"></div>
+            <div class="step active"><span class="step-num">3</span><span class="step-label">Payment</span></div>
+        </div>
+
+        <div class="checkout-card glass-panel">
+            <h1 class="section-title" style="margin-bottom:0.5rem;">Complete Payment</h1>
+            <p class="section-subtitle" style="margin-bottom:1.5rem;">Pay with your Robux balance</p>
+
+            <div class="payment-balance-card">
+                <div class="payment-balance-icon"><i data-lucide="wallet" style="width:32px;height:32px;"></i></div>
+                <div class="payment-balance-info">
+                    <span class="payment-balance-label">Your Balance</span>
+                    <span class="payment-balance-value">{{ user_balance|format_robux }} <i data-lucide="coins" style="width:20px;height:20px;"></i></span>
+                </div>
+            </div>
+
+            <div class="payment-order-summary">
+                <div class="payment-order-row"><span>Order Total</span><span style="font-weight:700;color:var(--accent-gold);font-size:1.25rem;">{{ total|format_robux }} <i data-lucide="coins" style="width:16px;height:16px;"></i></span></div>
+            </div>
+
+            {% if user_balance >= total %}
+            <div class="payment-note" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.2);">
+                <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--success);"></i>
+                <span>You have sufficient balance to complete this order.</span>
+            </div>
+            {% else %}
+            <div class="payment-note" style="background:rgba(255,23,68,0.1);border-color:rgba(255,23,68,0.2);">
+                <i data-lucide="alert-circle" style="width:18px;height:18px;color:var(--error);"></i>
+                <span>Insufficient balance. Need {{ total|format_robux }} Robux.</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="" class="checkout-actions" style="margin-top:1.5rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <a href="{{ url_for('checkout.review') }}" class="btn btn-dark"><i data-lucide="arrow-left"></i> Back</a>
+                <button type="submit" class="btn btn-pink btn-lg" {% if user_balance < total %}disabled{% endif %}>
+                    <i data-lucide="lock"></i> Pay {{ total|format_robux }} Robux
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.step.completed .step-num { background: var(--success); border-color: var(--success); color: #000; }
+.step-line.active { background: linear-gradient(90deg, var(--success), var(--primary)); }
+.checkout-card { padding: 2rem; }
+.payment-balance-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; background: var(--dark-elevated); border: 1px solid var(--dark-border); border-radius: var(--radius-md); margin-bottom: 1.5rem; }
+.payment-balance-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,215,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--accent-gold); }
+.payment-balance-info { display: flex; flex-direction: column; }
+.payment-balance-label { font-size: 0.8125rem; color: var(--text-muted); }
+.payment-balance-value { font-family: var(--font-heading); font-weight: 700; font-size: 1.5rem; color: var(--accent-gold); display: flex; align-items: center; gap: 0.25rem; }
+.payment-order-summary { padding: 1rem 0; border-bottom: 1px solid var(--dark-border); margin-bottom: 1rem; }
+.payment-order-row { display: flex; justify-content: space-between; align-items: center; }
+.payment-note { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: var(--radius-sm); border: 1px solid; font-size: 0.875rem; }
+</style>
+{% endblock %}

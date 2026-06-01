@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Add Address{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Add Address</h1>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="form-group"><label>Full Name</label>{{ form.full_name(class='form-input') }}</div>
+                <div class="form-group"><label>Phone</label>{{ form.phone(class='form-input') }}</div>
+                <div class="form-group"><label>Address Line 1</label>{{ form.address_line1(class='form-input') }}</div>
+                <div class="form-group"><label>Address Line 2</label>{{ form.address_line2(class='form-input') }}</div>
+                <div class="form-row">
+                    <div class="form-group"><label>City</label>{{ form.city(class='form-input') }}</div>
+                    <div class="form-group"><label>State</label>{{ form.state(class='form-input') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Postal Code</label>{{ form.postal_code(class='form-input') }}</div>
+                    <div class="form-group"><label>Country</label>{{ form.country(class='form-input') }}</div>
+                </div>
+                <div class="form-group form-checkbox">
+                    <label class="checkbox-label">{{ form.is_default() }} <span class="checkbox-text">Set as default</span></label>
+                </div>
+                <button type="submit" class="btn btn-pink">Save Address</button>
+                <a href="{{ url_for('auth.addresses') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

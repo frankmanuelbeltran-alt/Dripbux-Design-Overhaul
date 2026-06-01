@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Seller Orders{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:1.5rem;">Orders</h1>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <a href="{{ url_for('seller.orders') }}" class="btn btn-sm {% if not status %}btn-pink{% else %}btn-dark{% endif %}">All</a>
+            {% for s in ['pending','processing','shipped','delivered'] %}
+            <a href="{{ url_for('seller.orders', status=s) }}" class="btn btn-sm {% if status == s %}btn-pink{% else %}btn-dark{% endif %}">{{ s|title }}</a>
+            {% endfor %}
+        </div>
+        {% if order_items %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Product</th><th>Order</th><th>Qty</th><th>Revenue</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for oi in order_items %}
+                    <tr>
+                        <td style="display:flex;align-items:center;gap:0.5rem;">
+                            <img src="{{ oi.product.image_url or '/static/images/avatars/default-avatar.png' }}" alt="" style="width:32px;height:32px;border-radius:var(--radius-sm);object-fit:cover;" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            <span style="font-size:0.8125rem;">{{ oi.product.name }}</span>
+                        </td>
+                        <td style="font-size:0.8125rem;color:var(--primary);">#{{ oi.order.order_number }}</td>
+                        <td>{{ oi.quantity }}</td>
+                        <td style="color:var(--accent-gold);font-weight:600;">{{ (oi.price_robux * oi.quantity)|format_robux }}</td>
+                        <td><span class="order-status-badge status-{{ oi.order.status }}">{{ oi.order.status|title }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i data-lucide="shopping-bag" class="empty-icon"></i><p class="empty-desc">No orders yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

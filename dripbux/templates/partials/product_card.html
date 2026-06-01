@@ -1,0 +1,39 @@
+<div class="product-card fade-in">
+    <a href="{{ url_for('shop.product_detail', slug=product.slug) }}">
+        <div class="product-image-wrap">
+            <img src="{{ product.image_url or '/static/images/avatars/default-avatar.png' }}" 
+                 alt="{{ product.name }}" class="product-image" 
+                 onerror="this.src='/static/images/avatars/default-avatar.png'" loading="lazy">
+            <div class="product-badges">
+                {% if product.is_flash_sale %}<span class="product-badge badge-sale">-{{ product.get_discount_percentage() }}%</span>{% endif %}
+                {% if product.is_limited %}<span class="product-badge badge-limited"><i data-lucide="zap" style="width:10px;height:10px;"></i> Limited</span>{% endif %}
+                {% if product.is_new and not product.is_flash_sale and not product.is_limited %}<span class="product-badge badge-new">New</span>{% endif %}
+            </div>
+            {% if current_user.is_authenticated %}
+            <button type="button" class="product-wishlist {% if product.id in user_wishlist_ids %}in-wishlist{% endif %}"
+                    onclick="event.preventDefault(); toggleWishlist({{ product.id }}, this);">
+                <i data-lucide="heart"></i>
+            </button>
+            {% endif %}
+            {# wishlist badge removed here - product-wishlist button is used instead #}
+        </div>
+    </a>
+    <div class="product-info">
+        <div class="product-rarity-bar" style="background: {{ product.get_rarity_color() }}; box-shadow: 0 0 6px {{ product.get_rarity_color() }}40;"></div>
+        <a href="{{ url_for('shop.product_detail', slug=product.slug) }}" class="product-name">{{ product.name }}</a>
+        <div class="product-meta">
+            <div class="product-prices">
+                <span class="product-price">{{ product.get_display_price()|format_robux }} <i data-lucide="coins"></i></span>
+                {% if product.original_price and product.original_price > product.price_robux %}
+                <span class="product-original-price">{{ product.original_price|format_robux }}</span>
+                {% endif %}
+            </div>
+            {% if product.get_average_rating() > 0 %}
+            <div class="product-rating">
+                <i data-lucide="star" class="star-filled" style="width:12px;height:12px;"></i>
+                <span>{{ product.get_average_rating() }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

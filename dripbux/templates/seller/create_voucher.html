@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Create Voucher{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Create Voucher</h1>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="form-group">{{ form.code.label }}{{ form.code(class='form-input', placeholder='SUMMER2024', style='text-transform:uppercase;') }}</div>
+                <div class="form-group">{{ form.description.label }}{{ form.description(class='form-input', placeholder='Optional description') }}</div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.discount_type.label }}{{ form.discount_type(class='form-input') }}</div>
+                    <div class="form-group">{{ form.discount_value.label }}{{ form.discount_value(class='form-input', type='number') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.min_order_amount.label }}{{ form.min_order_amount(class='form-input', type='number') }}</div>
+                    <div class="form-group">{{ form.usage_limit.label }}{{ form.usage_limit(class='form-input', type='number') }}</div>
+                </div>
+                <div class="form-group">{{ form.expires_at.label }}{{ form.expires_at(class='form-input', type='date') }}</div>
+                <button type="submit" class="btn btn-pink">Create Voucher</button>
+                <a href="{{ url_for('seller.vouchers') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

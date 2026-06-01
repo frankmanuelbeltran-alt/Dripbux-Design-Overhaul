@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Sellers{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Sellers</h1>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <a href="{{ url_for('admin.sellers') }}" class="btn btn-sm {% if status == 'all' %}btn-pink{% else %}btn-dark{% endif %}">All</a>
+            <a href="{{ url_for('admin.sellers', status='pending') }}" class="btn btn-sm {% if status == 'pending' %}btn-pink{% else %}btn-dark{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.sellers', status='verified') }}" class="btn btn-sm {% if status == 'verified' %}btn-pink{% else %}btn-dark{% endif %}">Verified</a>
+            <a href="{{ url_for('admin.sellers', status='rejected') }}" class="btn btn-sm {% if status == 'rejected' %}btn-pink{% else %}btn-dark{% endif %}">Rejected</a>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Store</th><th>Owner</th><th>Sales</th><th>Revenue</th><th>Status</th><th>Warnings</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for seller in sellers.items %}
+                    <tr>
+                        <td style="display:flex;align-items:center;gap:0.5rem;">
+                            <img src="{{ seller.store_logo or '/static/images/avatars/default-avatar.png' }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            <span style="font-weight:500;">{{ seller.store_name }}</span>
+                        </td>
+                        <td>{{ seller.user.username }}</td>
+                        <td>{{ seller.total_sales }}</td>
+                        <td style="color:var(--accent-gold);">{{ seller.total_revenue|format_robux }}</td>
+                        <td><span class="badge badge-{{ 'warning' if seller.verification_status == 'pending' else 'green' if seller.verification_status == 'verified' else 'red' }}">{{ seller.verification_status|title }}</span></td>
+                        <td>{{ warning_counts.get(seller.user_id, 0) }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.manage_seller', seller_id=seller.id) }}" class="btn btn-sm btn-dark">Manage</a>
+                            {% if seller.verification_status == 'pending' %}
+                            <form method="POST" action="{{ url_for('admin.verify_seller', seller_id=seller.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="verify">
+                                <button type="submit" class="btn btn-sm btn-success">Verify</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.verify_seller', seller_id=seller.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/pagination.html' %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ seller.store_name }}{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Store Banner -->
+        <div class="store-banner" style="{% if seller.store_banner %}background:url('{{ seller.store_banner }}') center/cover;{% else %}background:linear-gradient(135deg,var(--dark-card),var(--dark-elevated));{% endif %}border-radius:var(--radius-lg);padding:3rem 2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+            <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1.25rem;">
+                <img src="{{ seller.store_logo or '/static/images/avatars/default-avatar.png' }}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);box-shadow:var(--shadow-pink);" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                <div>
+                    <h1 style="font-family:var(--font-heading);font-weight:700;font-size:1.5rem;">{{ seller.store_name }}</h1>
+                    <p style="font-size:0.8125rem;color:var(--text-secondary);max-width:500px;">{{ seller.store_description or 'No description yet.' }}</p>
+                    <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;font-size:0.8125rem;color:var(--text-muted);">
+                        <span><i data-lucide="shopping-bag" style="width:14px;height:14px;display:inline;"></i> {{ seller.total_sales }} sales</span>
+                        <span><i data-lucide="users" style="width:14px;height:14px;display:inline;"></i> {{ seller.follower_count }} followers</span>
+                        {% if seller.rating_average > 0 %}<span><i data-lucide="star" class="star-filled" style="width:14px;height:14px;display:inline;"></i> {{ seller.rating_average }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div style="position:absolute;top:1rem;right:1rem;z-index:2;">
+                <button type="button" class="btn btn-sm {% if is_following %}btn-dark{% else %}btn-pink{% endif %}" onclick="toggleFollow({{ seller.id }}, this)">
+                    {% if is_following %}Following{% else %}Follow{% endif %}
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="shop-header">
+            <h2 class="section-title" style="font-size:1.25rem;">Products</h2>
+            <select class="sort-select" onchange="window.location.href=this.value" style="width:auto;">
+                {% set base = url_for('shop.store', slug=seller.store_slug) %}
+                <option value="{{ base }}?sort=newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="{{ base }}?sort=price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low</option>
+                <option value="{{ base }}?sort=price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High</option>
+                <option value="{{ base }}?sort=popular" {% if sort == 'popular' %}selected{% endif %}>Popular</option>
+            </select>
+        </div>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state"><i data-lucide="box" class="empty-icon"></i><p class="empty-desc">No products in this store yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function toggleFollow(sellerId, btn) {
+    fetch('/shop/seller/' + sellerId + '/follow', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }})
+    .then(r => r.json()).then(data => {
+        if (data.success) { btn.textContent = data.following ? 'Following' : 'Follow'; btn.className = 'btn btn-sm ' + (data.following ? 'btn-dark' : 'btn-pink'); }
+    });
+}
+</script>
+{% endblock %}

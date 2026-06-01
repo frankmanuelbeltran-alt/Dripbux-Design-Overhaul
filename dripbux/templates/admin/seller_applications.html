@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Seller Applications{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="admin-header">
+      <h1 class="section-title">Seller Applications</h1>
+    </div>
+
+    <div class="admin-panel">
+      {% if applications.items %}
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>User</th><th>Store Name</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for app in applications.items %}
+              <tr>
+                <td>{{ app.user.username }}<br><small>{{ app.user.email }}</small></td>
+                <td>{{ app.store_name }}</td>
+                <td>{{ app.submitted_at.strftime('%Y-%m-%d') }}</td>
+                <td>{{ app.status }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('admin.review_seller_application', app_id=app.id) }}" style="display:inline-block;">
+                    <input type="hidden" name="action" value="approve">
+                    <button class="button is-small is-success" type="submit">Approve</button>
+                  </form>
+                  <form method="post" action="{{ url_for('admin.review_seller_application', app_id=app.id) }}" style="display:inline-block;margin-left:0.5rem;">
+                    <input type="hidden" name="action" value="reject">
+                    <button class="button is-small is-danger" type="submit">Reject</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          {% if applications.has_prev %}<a href="?page={{ applications.prev_num }}">Previous</a>{% endif %}
+          <span>Page {{ applications.page }} of {{ applications.pages }}</span>
+          {% if applications.has_next %}<a href="?page={{ applications.next_num }}">Next</a>{% endif %}
+        </div>
+      {% else %}
+        <p>No seller applications found.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

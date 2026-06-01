@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Orders</h1>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <a href="{{ url_for('admin.orders') }}" class="btn btn-sm {% if not status %}btn-pink{% else %}btn-dark{% endif %}">All</a>
+            {% for s in ['pending','processing','shipped','delivered','cancelled'] %}
+            <a href="{{ url_for('admin.orders', status=s) }}" class="btn btn-sm {% if status == s %}btn-pink{% else %}btn-dark{% endif %}">{{ s|title }}</a>
+            {% endfor %}
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Items</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for order in orders.items %}
+                    <tr>
+                        <td style="font-weight:500;color:var(--primary);">#{{ order.order_number }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td style="color:var(--accent-gold);font-weight:600;">{{ order.total_robux|format_robux }}</td>
+                        <td>{{ order.get_total_items() }}</td>
+                        <td><span class="order-status-badge status-{{ order.status }}">{{ order.status|title }}</span></td>
+                        <td style="font-size:0.8125rem;color:var(--text-muted);">{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                        <td><a href="{{ url_for('admin.order_detail', order_number=order.order_number) }}" class="btn btn-sm btn-dark">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/pagination.html' %}
+    </div>
+</section>
+{% endblock %}

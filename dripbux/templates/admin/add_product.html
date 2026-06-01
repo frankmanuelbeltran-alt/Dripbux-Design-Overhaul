@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Add Product{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Add Product</h1>
+            <form method="POST" action="" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="form-group">{{ form.name.label }}{{ form.name(class='form-input') }}</div>
+                <div class="form-group">{{ form.short_description.label }}{{ form.short_description(class='form-input') }}</div>
+                <div class="form-group">{{ form.description.label }}{{ form.description(class='form-input', rows=4) }}</div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.category_id.label }}{{ form.category_id(class='form-input') }}</div>
+                    <div class="form-group">{{ form.product_type.label }}{{ form.product_type(class='form-input') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.price_robux.label }}{{ form.price_robux(class='form-input', type='number') }}</div>
+                    <div class="form-group">{{ form.original_price.label }}{{ form.original_price(class='form-input', type='number') }}</div>
+                    <div class="form-group">{{ form.stock_quantity.label }}{{ form.stock_quantity(class='form-input', type='number') }}</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">{{ form.rarity.label }}{{ form.rarity(class='form-input') }}</div>
+                    <div class="form-group">{{ form.tags.label }}{{ form.tags(class='form-input', placeholder='comma, separated, tags') }}</div>
+                </div>
+                <div class="form-group">{{ form.image.label }}{{ form.image(class='form-input') }}</div>
+                <div style="display:flex;gap:0.75rem;margin:1rem 0;flex-wrap:wrap;">
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_active() }} <span class="checkbox-text">Active</span></label>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_featured() }} <span class="checkbox-text">Featured</span></label>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_new() }} <span class="checkbox-text">New</span></label>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_trending() }} <span class="checkbox-text">Trending</span></label>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_flash_sale() }} <span class="checkbox-text">Flash Sale</span></label>
+                    <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;">{{ form.is_limited() }} <span class="checkbox-text">Limited</span></label>
+                </div>
+                <button type="submit" class="btn btn-pink">Create Product</button>
+                <a href="{{ url_for('admin.products') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

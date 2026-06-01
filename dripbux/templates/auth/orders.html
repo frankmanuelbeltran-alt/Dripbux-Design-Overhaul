@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:1.5rem;">My Orders</h1>
+
+        <!-- Status Filter -->
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+            <a href="{{ url_for('auth.order_history') }}" class="btn btn-sm {% if not current_status %}btn-pink{% else %}btn-dark{% endif %}">All</a>
+            <a href="{{ url_for('auth.order_history', status='pending') }}" class="btn btn-sm {% if current_status == 'pending' %}btn-pink{% else %}btn-dark{% endif %}">Pending</a>
+            <a href="{{ url_for('auth.order_history', status='processing') }}" class="btn btn-sm {% if current_status == 'processing' %}btn-pink{% else %}btn-dark{% endif %}">Processing</a>
+            <a href="{{ url_for('auth.order_history', status='shipped') }}" class="btn btn-sm {% if current_status == 'shipped' %}btn-pink{% else %}btn-dark{% endif %}">Shipped</a>
+            <a href="{{ url_for('auth.order_history', status='delivered') }}" class="btn btn-sm {% if current_status == 'delivered' %}btn-pink{% else %}btn-dark{% endif %}">Delivered</a>
+        </div>
+
+        {% if orders.items %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders.items %}
+                    <tr>
+                        <td><a href="{{ url_for('orders.detail', order_number=order.order_number) }}" style="font-weight:600;color:var(--primary);">#{{ order.order_number }}</a></td>
+                        <td style="font-size:0.8125rem;color:var(--text-muted);">{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                        <td style="font-weight:600;color:var(--accent-gold);">{{ order.total_robux|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;display:inline;"></i></td>
+                        <td><span class="badge status-{{ order.status }}" style="font-size:0.625rem;">{{ order.status|title }}</span></td>
+                        <td>
+                            <a href="{{ url_for('orders.detail', order_number=order.order_number) }}" class="btn btn-sm btn-dark">View</a>
+                            {% if order.can_cancel() %}
+                            <form method="POST" action="{{ url_for('orders.cancel_order', order_number=order.order_number) }}" style="display:inline;" onsubmit="return confirm('Cancel this order?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state">
+            <i data-lucide="package" class="empty-icon"></i>
+            <p class="empty-desc">No orders found.</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-pink btn-sm">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.status-pending { background: rgba(255,196,0,0.15); color: var(--warning); }
+.status-processing { background: rgba(0,176,255,0.15); color: var(--info); }
+.status-shipped { background: rgba(157,78,221,0.15); color: var(--accent-purple); }
+.status-delivered { background: rgba(0,230,118,0.15); color: var(--success); }
+.status-cancelled { background: rgba(255,23,68,0.15); color: var(--error); }
+.status-refunded { background: rgba(106,106,128,0.15); color: var(--text-muted); }
+</style>
+{% endblock %}

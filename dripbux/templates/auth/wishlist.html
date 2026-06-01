@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}My Wishlist{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:1.5rem;">My Wishlist ({{ wishlist_items|length }})</h1>
+        {% if wishlist_items %}
+        <div class="products-grid wishlist-page">
+            {% for item in wishlist_items %}
+            {% set product = item.product %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i data-lucide="heart" class="empty-icon"></i>
+            <p class="empty-desc">Your wishlist is empty. Browse our shop to add items!</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-pink btn-sm">Browse Shop</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

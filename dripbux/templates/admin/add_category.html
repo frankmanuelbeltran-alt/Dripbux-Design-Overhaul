@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Add Category{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="glass-panel" style="padding:2rem;">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">Add Category</h1>
+            <form method="POST" action="" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="form-group">{{ form.name.label }}{{ form.name(class='form-input') }}</div>
+                <div class="form-group">{{ form.slug.label }}{{ form.slug(class='form-input', placeholder='category-slug') }}</div>
+                <div class="form-group">{{ form.description.label }}{{ form.description(class='form-input', rows=3) }}</div>
+                <div class="form-group">{{ form.image.label }}{{ form.image(class='form-input') }}</div>
+                <div class="form-group">{{ form.icon.label }}{{ form.icon(class='form-input', placeholder='tag') }}</div>
+                <div class="form-group">{{ form.display_order.label }}{{ form.display_order(class='form-input', type='number') }}</div>
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">{{ form.is_active() }} <span class="checkbox-text">Active</span></label>
+                <button type="submit" class="btn btn-pink">Add Category</button>
+                <a href="{{ url_for('admin.categories') }}" class="btn btn-dark" style="margin-left:0.5rem;">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

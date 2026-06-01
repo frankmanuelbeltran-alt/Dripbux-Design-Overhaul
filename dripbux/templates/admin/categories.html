@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="section-title">Categories</h1>
+            <a href="{{ url_for('admin.add_category') }}" class="btn btn-pink btn-sm"><i data-lucide="plus"></i> Add Category</a>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead><tr><th>Name</th><th>Slug</th><th>Products</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td style="font-weight:500;">{{ cat.name }}</td>
+                        <td style="font-family:monospace;font-size:0.8125rem;color:var(--text-muted);">{{ cat.slug }}</td>
+                        <td>{{ cat.get_product_count() }}</td>
+                        <td>{{ cat.display_order }}</td>
+                        <td>{% if cat.is_active %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Inactive</span>{% endif %}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.delete_category', category_id=cat.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this category? This cannot be undone.');" {% if cat.get_product_count() > 0 or cat.subcategories %}disabled title="Category has linked products or subcategories"{% endif %}>
+                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_name }}{% endblock %} | {{ app_tagline }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/particles.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dark-theme">
+    <!-- Particles Background -->
+    <div id="particles-container" class="particles-container">
+        <canvas id="particles-canvas"></canvas>
+    </div>
+
+    <!-- Announcement Banner -->
+    {% if active_announcements %}
+    <div class="announcement-bar">
+        {% for ann in active_announcements %}
+        <div class="announcement-item announcement-type-{{ ann.announcement_type }}">
+            <span class="announcement-text">{{ ann.title }}: {{ ann.content }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <nav class="main-navbar" id="mainNavbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <a href="{{ url_for('main.index') }}" class="nav-brand">
+                <span class="brand-icon"><i data-lucide="diamond" class="brand-diamond"></i></span>
+                <span class="brand-text">{{ app_name }}</span>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <div class="nav-links desktop-only">
+                <a href="{{ url_for('main.index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i data-lucide="home" class="nav-icon"></i> Home
+                </a>
+                <a href="{{ url_for('shop.index') }}" class="nav-link {% if '/shop' in request.path %}active{% endif %}">
+                    <i data-lucide="shopping-bag" class="nav-icon"></i> Shop
+                </a>
+                <a href="{{ url_for('shop.trending') }}" class="nav-link {% if '/trending' in request.path %}active{% endif %}">
+                    <i data-lucide="trending-up" class="nav-icon"></i> Trending
+                </a>
+                <a href="{{ url_for('shop.flash_sales') }}" class="nav-link {% if '/flash-sales' in request.path %}active{% endif %}">
+                    <i data-lucide="flame" class="nav-icon"></i> Flash Sales
+                </a>
+            </div>
+
+            <!-- Search Bar -->
+            <form action="{{ url_for('shop.search') }}" class="search-form desktop-only" method="get">
+                <input type="text" name="q" class="search-input" placeholder="Search products..." value="{{ request.args.get('q', '') }}" autocomplete="off">
+                <button type="submit" class="search-btn">
+                    <i data-lucide="search" class="search-icon"></i>
+                </button>
+                <div class="search-suggestions" id="searchSuggestions"></div>
+            </form>
+
+            <!-- Right Actions -->
+            <div class="nav-actions">
+                <button type="button" class="nav-action-btn theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle light/dark mode">
+                    <i data-lucide="moon" class="action-icon" id="themeToggleIcon"></i>
+                </button>
+                <a href="{{ url_for('cart.view_cart') }}" class="nav-action-btn cart-btn">
+                    <i data-lucide="shopping-cart" class="action-icon"></i>
+                    <span class="cart-badge" id="cartBadge">{{ cart_count }}</span>
+                </a>
+
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.notifications') }}" class="nav-action-btn notif-btn">
+                    <i data-lucide="bell" class="action-icon"></i>
+                    {% if unread_notifications > 0 %}
+                    <span class="notif-badge" id="notifBadge">{{ unread_notifications }}</span>
+                    {% endif %}
+                </a>
+
+                <div class="nav-user-menu">
+                    <button class="user-menu-toggle" id="userMenuToggle">
+                        <img src="{{ current_user.get_avatar() }}" alt="Avatar" class="user-avatar-small" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                        <span class="user-name">{{ current_user.get_display_name()[:12] }}</span>
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{{ current_user.get_avatar() }}" alt="Avatar" class="dropdown-avatar" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-username">{{ current_user.username }}</span>
+                                <span class="dropdown-robux">{{ current_user.robux_balance|format_robux }} <i data-lucide="coins" class="inline-icon-sm"></i></span>
+                                <span class="dropdown-role">{{ current_user.role|title }}</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('auth.profile') }}" class="dropdown-item">
+                            <i data-lucide="user" class="dropdown-icon"></i> My Profile
+                        </a>
+                        <a href="{{ url_for('orders.index') }}" class="dropdown-item">
+                            <i data-lucide="package" class="dropdown-icon"></i> My Orders
+                        </a>
+                        <a href="{{ url_for('auth.wishlist') }}" class="dropdown-item has-badge">
+                            <i data-lucide="heart" class="dropdown-icon"></i> Wishlist
+                            <span id="navWishlistCount" class="cart-badge">{{ wishlist_count }}</span>
+                        </a>
+                        {% if current_user.seller_profile %}
+                            {% if current_user.seller_profile.verification_status == 'verified' %}
+                            <a href="{{ url_for('seller.dashboard') }}" class="dropdown-item">
+                                <i data-lucide="store" class="dropdown-icon"></i> Seller Dashboard
+                            </a>
+                            {% elif current_user.seller_profile.verification_status == 'pending' %}
+                            <a href="{{ url_for('seller.apply') }}" class="dropdown-item">
+                                <i data-lucide="loader" class="dropdown-icon"></i> Seller Application Pending
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('seller.apply') }}" class="dropdown-item">
+                                <i data-lucide="loader" class="dropdown-icon"></i> Seller Application Pending
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('seller.apply') }}" class="dropdown-item">
+                                <i data-lucide="plus-circle" class="dropdown-icon"></i> Become a Seller
+                            </a>
+                        {% endif %}
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="dropdown-item">
+                            <i data-lucide="layout-dashboard" class="dropdown-icon"></i> Admin Panel
+                        </a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item danger">
+                            <i data-lucide="log-out" class="dropdown-icon"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="nav-btn btn-outline">Sign In</a>
+                <a href="{{ url_for('auth.register') }}" class="nav-btn btn-primary">Get Started</a>
+                {% endif %}
+
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i data-lucide="menu" class="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span class="mobile-brand">{{ app_name }}</span>
+            <button class="mobile-close" id="mobileMenuClose">
+                <i data-lucide="x" class="close-icon"></i>
+            </button>
+        </div>
+        <form action="{{ url_for('shop.search') }}" class="mobile-search" method="get">
+            <input type="text" name="q" class="mobile-search-input" placeholder="Search..." value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="mobile-search-btn"><i data-lucide="search"></i></button>
+        </form>
+        <div class="mobile-links">
+            <a href="{{ url_for('main.index') }}" class="mobile-link"><i data-lucide="home"></i> Home</a>
+            <a href="{{ url_for('shop.index') }}" class="mobile-link"><i data-lucide="shopping-bag"></i> Shop</a>
+            <a href="{{ url_for('shop.trending') }}" class="mobile-link"><i data-lucide="trending-up"></i> Trending</a>
+            <a href="{{ url_for('shop.flash_sales') }}" class="mobile-link"><i data-lucide="flame"></i> Flash Sales</a>
+            <a href="{{ url_for('shop.new_arrivals') }}" class="mobile-link"><i data-lucide="sparkles"></i> New Arrivals</a>
+            <div class="mobile-divider"></div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.profile') }}" class="mobile-link"><i data-lucide="user"></i> Profile</a>
+            <a href="{{ url_for('cart.view_cart') }}" class="mobile-link"><i data-lucide="shopping-cart"></i> Cart ({{ cart_count }})</a>
+            <a href="{{ url_for('auth.wishlist') }}" class="mobile-link"><i data-lucide="heart"></i> Wishlist</a>
+            <a href="{{ url_for('orders.index') }}" class="mobile-link"><i data-lucide="package"></i> Orders</a>
+            {% if current_user.seller_profile %}
+                {% if current_user.seller_profile.verification_status == 'verified' %}
+                <a href="{{ url_for('seller.dashboard') }}" class="mobile-link"><i data-lucide="store"></i> Seller Dashboard</a>
+                {% elif current_user.seller_profile.verification_status == 'pending' %}
+                <a href="{{ url_for('seller.apply') }}" class="mobile-link"><i data-lucide="loader"></i> Seller Application Pending</a>
+                {% endif %}
+            {% endif %}
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.dashboard') }}" class="mobile-link"><i data-lucide="layout-dashboard"></i> Admin</a>
+            {% endif %}
+            <div class="mobile-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="mobile-link danger"><i data-lucide="log-out"></i> Sign Out</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="mobile-link"><i data-lucide="log-in"></i> Sign In</a>
+            <a href="{{ url_for('auth.register') }}" class="mobile-link"><i data-lucide="user-plus"></i> Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" id="flashContainer">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}" data-auto-dismiss>
+            <i data-lucide="{% if category == 'success' %}check-circle{% elif category == 'error' %}alert-circle{% elif category == 'warning' %}alert-triangle{% else %}info{% endif %}" class="flash-icon"></i>
+            <span class="flash-text">{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i data-lucide="x" class="flash-close-icon"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% if request.referrer and request.referrer != request.url and request.endpoint != 'main.index' %}
+        <div class="page-controls">
+            <button type="button" class="btn btn-outline back-btn" onclick="window.history.back();">
+                <i data-lucide="arrow-left" class="icon-sm"></i> Back
+            </button>
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="{{ url_for('main.index') }}" class="footer-brand-link">
+                        <i data-lucide="diamond" class="footer-brand-icon"></i>
+                        <span class="footer-brand-text">{{ app_name }}</span>
+                    </a>
+                    <p class="footer-desc">The ultimate Roblox-inspired marketplace. Buy, sell, and trade with Robux.</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i data-lucide="twitter"></i></a>
+                        <a href="#" class="social-link"><i data-lucide="instagram"></i></a>
+                        <a href="#" class="social-link"><i data-lucide="youtube"></i></a>
+                        <a href="#" class="social-link"><i data-lucide="message-circle"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links-col">
+                    <h4 class="footer-heading">Shop</h4>
+                    <a href="{{ url_for('shop.index') }}" class="footer-link">All Products</a>
+                    <a href="{{ url_for('shop.trending') }}" class="footer-link">Trending</a>
+                    <a href="{{ url_for('shop.flash_sales') }}" class="footer-link">Flash Sales</a>
+                    <a href="{{ url_for('shop.new_arrivals') }}" class="footer-link">New Arrivals</a>
+                </div>
+                <div class="footer-links-col">
+                    <h4 class="footer-heading">Support</h4>
+                    <a href="{{ url_for('main.contact') }}" class="footer-link">Contact Us</a>
+                    <a href="{{ url_for('main.faq') }}" class="footer-link">FAQ</a>
+                    <a href="{{ url_for('main.terms') }}" class="footer-link">Terms of Service</a>
+                    <a href="{{ url_for('main.privacy') }}" class="footer-link">Privacy Policy</a>
+                </div>
+                <div class="footer-links-col">
+                    <h4 class="footer-heading">Sell</h4>
+                    <a href="{{ url_for('seller.apply') }}" class="footer-link">Become a Seller</a>
+                    <a href="{{ url_for('main.seller_guide') }}" class="footer-link">Seller Guide</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2024 {{ app_name }}. All rights reserved. v{{ app_version }}</p>
+                <p class="footer-currency">All prices in <span class="robux-highlight">ROBUX</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        lucide.createIcons();
+
+        // Mobile menu
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', () => mobileMenu.classList.add('open'));
+        }
+        if (mobileMenuClose && mobileMenu) {
+            mobileMenuClose.addEventListener('click', () => mobileMenu.classList.remove('open'));
+        }
+
+        // User dropdown
+        const userMenuToggle = document.getElementById('userMenuToggle');
+        const userDropdown = document.getElementById('userDropdown');
+        if (userMenuToggle && userDropdown) {
+            userMenuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', () => userDropdown.classList.remove('show'));
+        }
+
+        // Auto-dismiss flash messages
+        document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            }, 5000);
+        });
+
+        // Search suggestions
+        const searchInput = document.querySelector('.search-input');
+        const suggestions = document.getElementById('searchSuggestions');
+        if (searchInput && suggestions) {
+            let debounceTimer;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    suggestions.style.display = 'none';
+                    return;
+                }
+                debounceTimer = setTimeout(() => {
+                    fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.products.length > 0) {
+                                suggestions.innerHTML = data.products.map(p => `
+                                    <a href="/shop/product/${p.slug}" class="search-suggestion">
+                                        <img src="${p.image || '/static/images/avatars/default-avatar.png'}" alt="" class="suggestion-img">
+                                        <div class="suggestion-info">
+                                            <span class="suggestion-name">${p.name}</span>
+                                            <span class="suggestion-price">${p.price.toLocaleString()} <i data-lucide="coins" class="suggestion-coin"></i></span>
+                                        </div>
+                                    </a>
+                                `).join('');
+                                suggestions.style.display = 'block';
+                                lucide.createIcons();
+                            } else {
+                                suggestions.style.display = 'none';
+                            }
+                        });
+                }, 300);
+            });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-form')) suggestions.style.display = 'none';
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

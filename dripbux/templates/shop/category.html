@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="shop-header">
+            <h1 class="section-title">{{ category.name }}</h1>
+            <select class="sort-select" onchange="window.location.href=this.value" style="width:auto;">
+                {% set base = url_for('shop.category', slug=category.slug) %}
+                <option value="{{ base }}?sort=newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="{{ base }}?sort=price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low</option>
+                <option value="{{ base }}?sort=price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High</option>
+                <option value="{{ base }}?sort=popular" {% if sort == 'popular' %}selected{% endif %}>Popular</option>
+            </select>
+        </div>
+        <p class="section-subtitle" style="margin-bottom:1.5rem;">{{ category.description }}</p>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+        {% include 'partials/pagination.html' %}
+        {% else %}
+        <div class="empty-state"><i data-lucide="box" class="empty-icon"></i><p class="empty-desc">No products in this category yet.</p></div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

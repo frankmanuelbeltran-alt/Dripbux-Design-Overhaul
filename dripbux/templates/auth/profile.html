@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="profile-layout">
+            <!-- Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-card glass-panel">
+                    <div class="profile-avatar-wrap">
+                        <img src="{{ current_user.get_avatar() }}" alt="Avatar" class="profile-avatar" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                        {% if current_user.is_admin %}<span class="profile-badge-admin">Admin</span>
+                        {% elif current_user.is_seller %}<span class="profile-badge-seller">Seller</span>
+                        {% endif %}
+                    </div>
+                    <h2 class="profile-name">{{ current_user.username }}</h2>
+                    <p class="profile-email">{{ current_user.email }}</p>
+                    <div class="profile-balance">
+                        <i data-lucide="coins" class="balance-icon"></i>
+                        <span class="balance-value">{{ current_user.robux_balance|format_robux }}</span>
+                        <span class="balance-label">ROBUX</span>
+                    </div>
+                    <div class="profile-actions">
+                        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-pink btn-sm btn-block">Edit Profile</a>
+                        {% if current_user.seller_profile %}
+                            {% if current_user.seller_profile.verification_status == 'verified' %}
+                            <a href="{{ url_for('seller.dashboard') }}" class="btn btn-outline-light btn-sm btn-block">Seller Dashboard</a>
+                            {% elif current_user.seller_profile.verification_status == 'pending' %}
+                            <a href="{{ url_for('seller.apply') }}" class="btn btn-outline-light btn-sm btn-block">Seller Application Pending</a>
+                            {% else %}
+                            <a href="{{ url_for('seller.apply') }}" class="btn btn-outline-light btn-sm btn-block">Seller Application Pending</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('seller.apply') }}" class="btn btn-outline-light btn-sm btn-block">Become a Seller</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <nav class="profile-nav">
+                    <a href="{{ url_for('auth.profile') }}" class="profile-nav-link active"><i data-lucide="user"></i> Overview</a>
+                    <a href="{{ url_for('orders.index') }}" class="profile-nav-link"><i data-lucide="package"></i> My Orders</a>
+                    <a href="{{ url_for('auth.wishlist') }}" class="profile-nav-link"><i data-lucide="heart"></i> Wishlist</a>
+                    <a href="{{ url_for('auth.notifications') }}" class="profile-nav-link"><i data-lucide="bell"></i> Notifications</a>
+                    <a href="{{ url_for('auth.addresses') }}" class="profile-nav-link"><i data-lucide="map-pin"></i> Addresses</a>
+                    <a href="{{ url_for('auth.change_password') }}" class="profile-nav-link"><i data-lucide="lock"></i> Password</a>
+                    {% if current_user.seller_profile %}
+                        {% if current_user.seller_profile.verification_status == 'verified' %}
+                        <a href="{{ url_for('seller.dashboard') }}" class="profile-nav-link"><i data-lucide="store"></i> Seller Dashboard</a>
+                        {% elif current_user.seller_profile.verification_status == 'pending' %}
+                        <a href="{{ url_for('seller.apply') }}" class="profile-nav-link"><i data-lucide="loader"></i> Seller Application Pending</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="profile-nav-link"><i data-lucide="layout-dashboard"></i> Admin Panel</a>
+                    {% endif %}
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="profile-main">
+                <!-- Recent Orders -->
+                <div class="profile-section card">
+                    <div class="profile-section-header">
+                        <h3 class="profile-section-title">Recent Orders</h3>
+                        <a href="{{ url_for('orders.index') }}" class="view-all-link">View All <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
+                    </div>
+                    {% if recent_orders %}
+                    <div class="order-list">
+                        {% for order in recent_orders %}
+                        <a href="{{ url_for('orders.detail', order_number=order.order_number) }}" class="order-item">
+                            <div class="order-info">
+                                <span class="order-number">#{{ order.order_number }}</span>
+                                <span class="order-date">{{ order.created_at.strftime('%b %d, %Y') }}</span>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-total">{{ order.total_robux|format_robux }} <i data-lucide="coins" style="width:12px;height:12px;"></i></span>
+                                <span class="order-status status-{{ order.status }}">{{ order.status|title }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state" style="padding:2rem;">
+                        <i data-lucide="package" class="empty-icon"></i>
+                        <p class="empty-desc">No orders yet. Start shopping!</p>
+                        <a href="{{ url_for('shop.index') }}" class="btn btn-pink btn-sm">Browse Shop</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Wishlist Preview -->
+                <div class="profile-section card">
+                    <div class="profile-section-header">
+                        <h3 class="profile-section-title">Wishlist</h3>
+                        <a href="{{ url_for('auth.wishlist') }}" class="view-all-link">View All <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
+                    </div>
+                    {% if wishlist_items %}
+                    <div class="wishlist-preview">
+                        {% for item in wishlist_items %}
+                        <a href="{{ url_for('shop.product_detail', slug=item.product.slug) }}" class="wishlist-preview-item">
+                            <img src="{{ item.product.image_url or '/static/images/avatars/default-avatar.png' }}" alt="" class="wishlist-preview-img" onerror="this.src='/static/images/avatars/default-avatar.png'">
+                            <div class="wishlist-preview-info">
+                                <span class="wishlist-preview-name">{{ item.product.name }}</span>
+                                <span class="wishlist-preview-price">{{ item.product.get_display_price()|format_robux }} <i data-lucide="coins" style="width:10px;height:10px;"></i></span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state" style="padding:2rem;">
+                        <i data-lucide="heart" class="empty-icon"></i>
+                        <p class="empty-desc">Your wishlist is empty.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recently Viewed -->
+                {% if recently_viewed %}
+                <div class="profile-section card">
+                    <div class="profile-section-header">
+                        <h3 class="profile-section-title">Recently Viewed</h3>
+                    </div>
+                    <div class="products-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));">
+                        {% for rv in recently_viewed %}
+                        {% set product = rv.product %}
+                        {% include 'partials/product_card.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; }
+.profile-card { padding: 1.5rem; text-align: center; }
+.profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 1rem; }
+.profile-avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: var(--shadow-pink); }
+.profile-badge-admin, .profile-badge-seller {
+    position: absolute;
+    bottom: 0; right: 0;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.profile-badge-admin { background: var(--accent-purple); color: white; }
+.profile-badge-seller { background: var(--success); color: #000; }
+.profile-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.125rem; margin-bottom: 0.25rem; }
+.profile-email { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.profile-balance {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: var(--radius-full);
+    margin-bottom: 1rem;
+}
+.balance-icon { width: 18px; height: 18px; color: var(--accent-gold); }
+.balance-value { font-weight: 700; color: var(--accent-gold); }
+.balance-label { font-size: 0.6875rem; color: var(--text-muted); }
+.profile-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+.profile-nav { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 1rem; }
+.profile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+.profile-nav-link:hover, .profile-nav-link.active { background: rgba(255, 77, 141, 0.1); color: var(--primary); }
+.profile-nav-link i { width: 16px; height: 16px; }
+.profile-main { display: flex; flex-direction: column; gap: 1.5rem; }
+.profile-section { padding: 1.25rem; }
+.profile-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.profile-section-title { font-family: var(--font-heading); font-weight: 600; font-size: 1rem; }
+.order-list { display: flex; flex-direction: column; }
+.order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--dark-border);
+    transition: background 0.2s;
+}
+.order-item:last-child { border-bottom: none; }
+.order-item:hover { background: rgba(255, 77, 141, 0.02); }
+.order-info { display: flex; flex-direction: column; gap: 0.125rem; }
+.order-number { font-weight: 600; font-size: 0.8125rem; }
+.order-date { font-size: 0.75rem; color: var(--text-muted); }
+.order-meta { display: flex; align-items: center; gap: 0.75rem; }
+.order-total { font-weight: 600; font-size: 0.8125rem; color: var(--accent-gold); display: flex; align-items: center; gap: 0.125rem; }
+.order-status { padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; }
+.status-pending { background: rgba(255, 196, 0, 0.15); color: var(--warning); }
+.status-processing { background: rgba(0, 176, 255, 0.15); color: var(--info); }
+.status-shipped { background: rgba(157, 78, 221, 0.15); color: var(--accent-purple); }
+.status-delivered { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+.status-cancelled { background: rgba(255, 23, 68, 0.15); color: var(--error); }
+.wishlist-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
+.wishlist-preview-item { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem; border-radius: var(--radius-sm); transition: background 0.2s; }
+.wishlist-preview-item:hover { background: var(--dark-elevated); }
+.wishlist-preview-img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; }
+.wishlist-preview-info { display: flex; flex-direction: column; min-width: 0; }
+.wishlist-preview-name { font-size: 0.8125rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wishlist-preview-price { font-size: 0.75rem; color: var(--accent-gold); }
+@media (max-width: 992px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-sidebar { order: 1; }
+    .profile-nav { flex-direction: row; flex-wrap: wrap; }
+}
+</style>
+{% endblock %}
